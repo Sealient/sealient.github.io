@@ -1,94 +1,97 @@
-// Optional dynamic effect for 3D hover
-document.body.addEventListener('mousemove', (e) => {
-  const x = (e.clientX / window.innerWidth - 0.5) * 20;
-  const y = (e.clientY / window.innerHeight - 0.5) * 20;
-  document.querySelector('.holographic-container').style.transform =
-    `perspective(1000px) rotateY(${x}deg) rotateX(${y}deg)`;
-});
+document.addEventListener("DOMContentLoaded", () => {
+    const toggleAboutBtn = document.getElementById("toggleAbout");
+    const toggleSocialsBtn = document.getElementById("toggleSocials");
+    const toggleStatsBtn = document.getElementById("toggleStats");
 
-// Update the current time and date every second
-function updateTime() {
-  const timeElement = document.getElementById('current-time');
-  const now = new Date();
-  timeElement.textContent = `${now.toLocaleTimeString()} | ${now.toLocaleDateString()}`;
-}
+    const aboutLayer = document.getElementById("about");
+    const socialsLayer = document.getElementById("socials");
+    const statsLayer = document.getElementById("stats");
 
-updateTime();
-setInterval(updateTime, 1000);
+    const card = document.querySelector(".card");
 
-// Check for updates from a GitHub file
-const updateFileUrl = 'https://raw.githubusercontent.com/Sealient/Updates/refs/heads/main/updates.txt';
-let lastUpdate = '';
+    // Ensure elements exist before adding event listeners
+    if (toggleAboutBtn && aboutLayer) {
+        toggleAboutBtn.addEventListener("click", () => {
+            aboutLayer.classList.toggle("hidden");
+        });
+    }
 
-// Show notification for new updates
-function showNotification(message) {
-  const notification = document.createElement('div');
-  notification.classList.add('notification', 'show');
-  notification.innerHTML = `<p><span>New Update:</span> ${message}</p>`;
-  document.getElementById('notifications').appendChild(notification);
+    if (toggleSocialsBtn && socialsLayer) {
+        toggleSocialsBtn.addEventListener("click", () => {
+            socialsLayer.classList.toggle("hidden");
+        });
+    }
 
-  setTimeout(() => {
-    notification.classList.remove('show');
-    notification.classList.add('hide');
-    setTimeout(() => notification.remove(), 300);
-  }, 5000);
-}
+    if (toggleStatsBtn && statsLayer) {
+        toggleStatsBtn.addEventListener("click", () => {
+            statsLayer.classList.toggle("hidden");
 
-// Check for updates and show notification if any
-function checkForUpdates() {
-  fetch(updateFileUrl)
-    .then(response => response.ok ? response.text() : Promise.reject('Failed to fetch updates'))
-    .then(data => {
-      const updates = data.split('\n').map(update => update.trim()).filter(Boolean);
-      if (updates.length > 0 && updates[0] !== lastUpdate) {
-        showNotification(updates[0]);
-        lastUpdate = updates[0];
-      }
-    })
-    .catch(error => console.error('Error fetching updates:', error));
-}
+            if (!statsLayer.classList.contains("hidden")) {
+                loadStats();
+            }
+        });
+    }
 
-setInterval(checkForUpdates, 30000);
-checkForUpdates();
+    // Mousemove 3D Effect
+    document.addEventListener("mousemove", (e) => {
+        if (!card) return;
+        
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 30;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 30;
 
-// Handle category toggling
-document.querySelectorAll('.category').forEach(category => {
-  const title = category.querySelector('.category-title');
-  const content = category.querySelector('.category-content');
-  
-  title.addEventListener('click', (e) => {
-    e.preventDefault();
-    content.classList.toggle('active');
-    document.querySelectorAll('.category-content').forEach(c => {
-      if (c !== content) c.classList.remove('active');
+        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
     });
-  });
+
+    document.addEventListener("mouseleave", () => {
+        if (card) {
+            card.style.transform = "rotateY(0deg) rotateX(0deg)";
+        }
+    });
+
+    // Fetch and Display Stats
+    async function loadStats() {
+        const statsContainer = document.getElementById("stats-content");
+        if (!statsContainer) return;
+
+        statsContainer.innerHTML = "Loading stats...";
+
+        try {
+            const response = await fetch("https://raw.githubusercontent.com/Sealient/Stats/refs/heads/main/data.json");
+            if (!response.ok) throw new Error("Network response was not ok");
+
+            const data = await response.json();
+            statsContainer.innerHTML = ""; // Clear previous content
+
+            Object.keys(data).forEach((category) => {
+                const header = document.createElement("h4");
+                header.classList.add("stat-header");
+                header.innerText = category;
+                statsContainer.appendChild(header);
+
+                Object.entries(data[category]).forEach(([key, value]) => {
+                    const statItem = document.createElement("div");
+                    statItem.classList.add("stat-item");
+                    statItem.innerHTML = `<span class="stat-label">${key}:</span> <span>${value}</span>`;
+                    statsContainer.appendChild(statItem);
+                });
+            });
+        } catch (error) {
+            statsContainer.innerHTML = "⚠️ Failed to load stats.";
+            console.error("Error loading stats:", error);
+        }
+    }
 });
 
-// Tooltip logic
-document.querySelectorAll('.social-link').forEach(link => {
-  link.addEventListener('mouseenter', () => {
-    link.setAttribute('title', link.getAttribute('data-tooltip'));
-  });
-  link.addEventListener('mouseleave', () => {
-    link.removeAttribute('title');
-  });
+document.getElementById("overlay").addEventListener("click", function() {
+    const video = document.getElementById("bg-video");
+    const audio = document.getElementById("bg-audio");
+
+    // Play both video and audio
+    video.play();
+    audio.play();
+
+    // Hide overlay
+    this.classList.add("hidden");
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const enterScreen = document.getElementById('enter-screen');
-  const holographicContainer = document.querySelector('.holographic-container');
-  const backgroundMusic = document.getElementById('background-music');
-  const backgroundVideo = document.getElementById('background-video');
 
-  // Wait for user click to start
-  enterScreen.addEventListener('click', () => {
-    // Hide the "Click to Enter" screen
-    enterScreen.style.display = 'none';
-
-    // Start the background music and video
-    backgroundMusic.play().catch(error => console.error('Error starting the music:', error));
-    backgroundVideo.play().catch(error => console.error('Error starting the video:', error));
-
-  });
-});
