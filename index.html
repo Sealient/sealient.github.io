@@ -1,117 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Sealient's Cove</title>
-  <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS file -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sealients Cove</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-
-<div id="enter-screen" class="enter-screen">
-  <h1>Click to Enter</h1>
-</div>
-  
-<div class="holographic-container">
-  <!-- Profile Picture -->
-  <div class="profile-picture">
-    <img src="logo.png" alt="Profile Picture">
-  </div>
-
-  <!-- User Info -->
-  <div class="info">
-    <h1 class="username">SΞΛL.</h1>
-
-    <!-- Categories -->
-    <div class="categories">
-      <!-- Socials -->
-      <div class="category">
-        <a href="#" class="category-title">Socials</a>
-        <div class="category-content">
-          <div class="social-links">
-            <a href="#" class="social-link" data-tooltip="Chat with me on Discord!">Discord: sealrl_</a>
-            <a href="#" class="social-link" data-tooltip="Check out my TikToks!">TikTok: @Sealient</a>
-            <a href="#" class="social-link" data-tooltip="Epic games and more!">Epic Games: JDESS.</a>
-            <a href="#" class="social-link" data-tooltip="See my Steam library">Steam: NightlyDrum</a>
-            <a href="#" class="social-link" data-tooltip="Watch my streams!">Twitch: twitch.tv/NightlyDrum</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- About Me -->
-<div class="category">
-  <a href="#" class="category-title">About Me</a>
-  <div class="category-content">
-<div class="about-me">
-  <div class="box">
-    <h2>About Me</h2>
-    <p>Creative individual who loves music, gaming, and designing dynamic webpages.</p>
-    <div class="tooltip">Click to read more about my hobbies and passions!</div>
-  </div>
-  <div class="box">
-    <h2>Hobbies</h2>
-    <ul>
-      <li>Gaming</li>
-      <li>Coding</li>
-      <li>Making AMVs</li>
-    </ul>
-    <div class="tooltip">I spend a lot of time working on my music and AMV projects.</div>
-  </div>
-  <div class="box">
-    <h2>Contact</h2>
-    <p>Reach out to me on Discord or through my socials.</p>
-    <div class="tooltip">Click to view my Discord and social links!</div>
-  </div>
-</div>
-</div>
-</div>
-      <!-- Stats -->
-      <div class="category">
-        <a href="#" class="category-title">Stats</a>
-        <div class="category-content">
-<div class="stats-container">
-  <div class="stat">
-    <div class="stat-icon">🔥</div>
-    <div class="stat-title">Games Played</div>
-    <div class="stat-value">250</div>
-  </div>
-  <div class="stat">
-    <div class="stat-icon">🏆</div>
-    <div class="stat-title">Wins</div>
-    <div class="stat-value">2,473</div>
-  </div>
-  <div class="stat">
-    <div class="stat-icon">⚡</div>
-    <div class="stat-title">Rank</div>
-    <div class="stat-value">C3</div>
-  </div>
-</div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- Overlay Screen -->
+<div id="overlay" class="overlay">
+    <p>Click to Enter</p>
 </div>
 
-<!-- Time Display -->
-<div id="current-time" class="current-time"></div>
-  
-  <!-- Video Background -->
-  <video id="background-video" loop muted>
+<!-- Background Video -->
+<video id="bg-video" class="background-video" loop muted>
     <source src="Download.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+</video>
 
-  <!-- Music (Hidden and starts automatically on click) -->
-  <audio id="background-music" loop>
-    <source src="background-music.mp3" type="audio/mp3">
-    Your browser does not support the audio element.
-  </audio>
-    
-<!-- Notifications Section -->
-<div id="notifications"></div>
+<!-- Background Audio -->
+<audio id="bg-audio" loop>
+    <source src="background-music.mp3" type="audio/mpeg">
+</audio>
 
-<script src="script.js"></script> <!-- Link to external JavaScript file -->
 
+    <div class="container">
+        <div class="card">
+            <!-- Socials Layer -->
+<!-- Socials Layer -->
+<div id="socials" class="socials hidden">
+    <a href="#" class="social-item">
+        <i class="fa-brands fa-discord"></i> Sealient#1234
+    </a>
+    <a href="https://steamcommunity.com/profiles/76561199539197575/" target="_blank" class="social-item">
+        <i class="fa-brands fa-steam"></i> Steam Profile
+    </a>
+    <a href="#" class="social-item">
+        <i class="fa-brands fa-gamepad"></i> JDESS.
+    </a>
+    <a href="https://www.tiktok.com/@sealient" target="_blank" class="social-item">
+        <i class="fa-brands fa-tiktok"></i> TikTok
+    </a>
+    <a href="https://www.twitch.tv/sealient" target="_blank" class="social-item">
+        <i class="fa-brands fa-twitch"></i> Twitch
+    </a>
+</div>
+
+            <!-- About Me Layer -->
+            <div class="layer about-layer hidden" id="about">
+                <h3>About Me</h3>
+                <p><span class="highlight">👋 Hi! I'm SΞΛL.</span> I’m passionate about gaming and web development.</p>
+                <ul>
+                    <li>🎮 <strong>Gamer</strong> - Passionate about immersive worlds and epic adventures.</li>
+                    <li>📝 <strong>About Me</strong> - Always exploring new games, stories, and strategies.</li>
+                    <li>🚀 <strong>Competitive Spirit</strong> - Love pushing my skills to the next level.</li>
+                </ul>
+            </div>
+            
+            <!-- Stats Layer -->
+		<div class="layer stats-layer hidden" id="stats">
+		    <h3>📊 My Stats</h3>
+		    <div id="stats-content">Loading stats...</div>
+		</div>
+
+            <!-- Profile Picture Layer -->
+            <div class="layer pfp-layer">
+                <img src="pfp.jpg" alt="Profile Picture" class="pfp">
+            </div>
+
+            <!-- Username Layer -->
+            <div class="layer username-layer">
+                <h2 class="username">SΞΛL.</h2>
+            </div>
+
+            <!-- Buttons Layer -->
+            <div class="layer buttons-layer">
+                <div class="buttons">
+                    <button id="toggleSocials">Socials</button>
+                    <button id="toggleAbout">About Me</button>
+                    <button id="toggleStats">Stats</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
+
