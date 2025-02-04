@@ -94,4 +94,28 @@ document.getElementById("overlay").addEventListener("click", function() {
     this.classList.add("hidden");
 });
 
+// Timer Element
+const timerElement = document.createElement("div");
+timerElement.classList.add("timer");
+document.body.appendChild(timerElement);
+
+// Function to update the time
+function updateTimer() {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    const amPm = hours >= 12 ? "PM" : "AM";
+
+    // Convert to 12-hour format
+    hours = hours % 12 || 12;
+
+    timerElement.innerText = `${hours}:${minutes}:${seconds} ${amPm}`;
+}
+
+// Update every second
+setInterval(updateTimer, 1000);
+updateTimer(); // Initialize immediately
+
+
 
