@@ -117,5 +117,64 @@ function updateTimer() {
 setInterval(updateTimer, 1000);
 updateTimer(); // Initialize immediately
 
+// Simulate loading progress with more advanced steps
+const loadingProgress = document.querySelector('.loading-progress');
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingText = document.querySelector('.loading-text');
+
+let progress = 0;
+
+function updateLoadingBar() {
+    if (progress < 100) {
+        progress += Math.random() * 4 + 2; // Increase progress by random increment (faster)
+
+        // Ensuring the progress doesn't exceed 100
+        if (progress > 100) progress = 100;
+        
+        loadingProgress.style.width = `${progress.toFixed(1)}%`;
+
+        // Update feedback text dynamically based on progress
+        if (progress < 30) {
+            loadingText.innerText = "Loading assets...";
+        } else if (progress < 60) {
+            loadingText.innerText = "Setting up... Almost there!";
+        } else if (progress < 90) {
+            loadingText.innerText = "Almost done... Just a few seconds!";
+        } else {
+            loadingText.innerText = "Finishing up...";
+        }
+    } else {
+        // Hide the loading overlay once done
+        setTimeout(() => {
+            loadingOverlay.style.opacity = '0'; // Fade out the overlay
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none'; // Hide it completely after fade
+            }, 1000);
+        }, 300);
+    }
+}
+
+// Call the function every 50ms to simulate advanced loading with more dynamic progress
+setInterval(updateLoadingBar, 50);
+
+let currentIndex = 0;
+const items = document.querySelectorAll('.carousel-item');
+const carouselTrack = document.querySelector('.carousel-track');
+
+// Auto change item every 5 seconds
+setInterval(() => {
+    if (currentIndex === items.length - 1) {
+        currentIndex = 0;
+    } else {
+        currentIndex++;
+    }
+    updateCarouselPosition();
+}, 5000);
+
+function updateCarouselPosition() {
+    carouselTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
+}
+
+
 
 
