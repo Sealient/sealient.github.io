@@ -3,141 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sealients Cove</title>
+    <title>Neon Future | Personal Portfolio</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-<!-- Overlay Screen -->
-<div id="overlay" class="overlay">
-    <p>Click to Enter</p>
-</div>
-
-<!-- Background Video -->
-<video id="bg-video" class="background-video" loop muted>
-    <source src="Download.mp4" type="video/mp4">
-</video>
-
-<!-- Background Audio -->
-<audio id="bg-audio" loop>
-    <source src="background-music.mp3" type="audio/mpeg">
-</audio>
-
-<!-- Overlay (to hide content) -->
-<div id="loading-overlay">
-    <div class="loading-bar">
-        <div class="loading-progress"></div>
-    </div>
-    <div class="loading-text">Loading... Please wait</div>
-</div>
-
-<div class="container">
-    <div class="carousel-container">
-        <h2 class="carousel-heading">Recent Games Played</h2>
-        <div class="carousel">
-            <div class="carousel-track">
-                <!-- Game 1 -->
-                <div class="carousel-item">
-                    <img src="https://github.com/Sealient/Stats/blob/main/game1.png?raw=true" class="game-image" alt="Game 1">
-                </div>
-                <!-- Game 2 -->
-                <div class="carousel-item">
-                    <img src="https://github.com/Sealient/Stats/blob/main/game2.jpg?raw=true" class="game-image" alt="Game 2">
-                </div>
-                <!-- Game 3 -->
-                <div class="carousel-item">
-                    <img src="https://github.com/Sealient/Stats/blob/main/game3.jpg?raw=true" class="game-image" alt="Game 3">
-                </div>
-            </div>
-        </div>
+    <div class="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">INITIALIZING GAMING INTERFACE</div>
     </div>
 
-    <div class="carousel-container">
-        <h2 class="carousel-heading">Game Clips Showcase</h2>
-        <div class="carousel">
-            <div class="carousel-track">
-                <!-- Clip 1 -->
-                <div class="carousel-item">
-                    <a style="
-    color: violet;
-"> Video Coming Soon... </a>
-                </div>
-                <!-- Clip 2 -->
-                <div class="carousel-item">
-                    <a style="
-    color: violet;
-"> Video Coming Soon... </a>                </div>
-                <!-- Clip 3 -->
-                <div class="carousel-item">
-                    <a style="
-    color: violet;
-"> Video Coming Soon... </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-    <div class="container">
-        <div class="card">
-            <!-- Socials Layer -->
-<!-- Socials Layer -->
-<div id="socials" class="socials hidden">
-    <a href="#" class="social-item">
-        <i class="fa-brands fa-discord"></i> Sealient#1234
-    </a>
-    <a href="https://steamcommunity.com/profiles/76561199539197575/" target="_blank" class="social-item">
-        <i class="fa-brands fa-steam"></i> Steam Profile
-    </a>
-    <a href="#" class="social-item">
-        <i class="fa-brands fa-gamepad"></i> JDESS.
-    </a>
-    <a href="https://www.tiktok.com/@sealient" target="_blank" class="social-item">
-        <i class="fa-brands fa-tiktok"></i> TikTok
-    </a>
-    <a href="https://www.twitch.tv/sealient" target="_blank" class="social-item">
-        <i class="fa-brands fa-twitch"></i> Twitch
-    </a>
-</div>
-
-            <!-- About Me Layer -->
-            <div class="layer about-layer hidden" id="about">
-                <h3>About Me</h3>
-                <p><span class="highlight">👋 Hi! I'm SΞΛL.</span> I’m passionate about gaming and web development.</p>
+    <div class="overlay">
+        <header>
+            <div class="logo">NEON<span class="accent">PULSE</span></div>
+            <nav>
                 <ul>
-                    <li>🎮 <strong>Gamer</strong> - Passionate about immersive worlds and epic adventures.</li>
-                    <li>📝 <strong>About Me</strong> - Always exploring new games, stories, and strategies.</li>
-                    <li>🚀 <strong>Competitive Spirit</strong> - Love pushing my skills to the next level.</li>
+                    <li><a href="#" class="active" data-section="home">HOME</a></li>
+                    <li><a href="#" data-section="projects">CONTENT</a></li>
+                    <li><a href="#" data-section="about">ABOUT</a></li>
+                    <li><a href="#" data-section="contact">CONTACT</a></li>
                 </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section id="home" class="section active">
+                <div class="content">
+                    <h1>SEALIENT <span class="accent"> COVE</span></h1>
+                    <h2>GAMER & CONTENT CREATOR</h2>
+                    <p>Bringing gaming and content creation to life with skill and imagination.</p>
+                    <div class="cta-buttons">
+                        <button class="primary-btn">EXPLORE CONTENT</button>
+                        <button class="secondary-btn">CONNECT</button>
+                    </div>
+                </div>
+            </section>
+
+<section id="projects" class="section">
+    <div class="content">
+        <h2>FEATURED <span class="accent">CONTENT</span></h2>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-image" style="background-image: url('images/streaming-setup.png'); background-size: contain; background-position: center;"></div>
+                <h3>LIVE STREAMING</h3>
+                <p>Broadcasting gaming sessions and engaging with my audience in real-time. Join the fun!</p>
+            </div>
+            <div class="project-card">
+                <div class="project-image" style="background-image: url('images/content-creation.png'); background-size: contain; background-position: center;"></div>
+                <h3>VIDEO CREATION</h3>
+                <p>Crafting high-energy gameplay videos, tutorials, and content that entertain and inform.</p>
+            </div>
+            <div class="project-card">
+                <div class="project-image" style="background-image: url('images/gameplay-highlight.png'); background-size: contain; background-position: center;"></div>
+                <h3>GAMING MOMENTS</h3>
+                <p>Capturing epic gaming moments and creating highlights to share with my community.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="section">
+    <div class="content">
+        <h2>ABOUT <span class="accent">ME</span></h2>
+        <div class="about-content">
+            <p>Passionate gamer and content creator with a knack for blending creativity and technology. I thrive on crafting engaging experiences that entertain, challenge, and inspire.</p>
+            <p>Whether streaming intense gameplay, producing captivating videos, or creating original music, I aim to share authentic, high-energy content with my audience.</p>
+            <div class="skills">
+                <div class="skill">
+                    <span class="skill-name">Strategic Thinking</span>
+                    <div class="skill-bar"><div class="skill-level" style="width: 90%"></div></div>
+                </div>
+                <div class="skill">
+                    <span class="skill-name">Design & Development</span>
+                    <div class="skill-bar"><div class="skill-level" style="width: 85%"></div></div>
+                </div>
+                <div class="skill">
+                    <span class="skill-name">Attention to Detail</span>
+                    <div class="skill-bar"><div class="skill-level" style="width: 88%"></div></div>
+                </div>
+                <div class="skill">
+                    <span class="skill-name">Coding</span>
+                    <div class="skill-bar"><div class="skill-level" style="width: 80%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="section">
+    <div class="content">
+        <h2>GAMING <span class="accent">CONNECTIONS</span></h2>
+        <p>Connect with me across the digital universe through these neural pathways.</p>
+        
+        <div class="social-tree">
+            <div class="social-card">
+                <div class="social-icon-container">
+                    <img src="https://i.imgur.com/grIoSCM.png" alt="Twitter" class="social-icon-img">
+                </div>
+                <div class="social-info">
+                    <h3>Twitter</h3>
+                    <p>@SealientGaming</p>
+                </div>
+                <a href="https://x.com/SealientGaming" class="social-link-btn">CONNECT</a>
             </div>
             
-            <!-- Stats Layer -->
-		<div class="layer stats-layer hidden" id="stats">
-		    <h3>📊 My Stats</h3>
-		    <div id="stats-content">Loading stats...</div>
-		</div>
-
-            <!-- Profile Picture Layer -->
-            <div class="layer pfp-layer">
-                <img src="pfp.jpg" alt="Profile Picture" class="pfp">
-            </div>
-
-            <!-- Username Layer -->
-            <div class="layer username-layer">
-                <h2 class="username">SΞΛL.</h2>
-            </div>
-
-            <!-- Buttons Layer -->
-            <div class="layer buttons-layer">
-                <div class="buttons">
-                    <button id="toggleSocials">Socials</button>
-                    <button id="toggleAbout">About Me</button>
-                    <button id="toggleStats">Stats</button>
+            <div class="social-card">
+                <div class="social-icon-container">
+                    <img src="https://i.imgur.com/wHvzROO.png" alt="YouTube" class="social-icon-img">
                 </div>
+                <div class="social-info">
+                    <h3>YouTube</h3>
+                    <p>Sealient Gaming</p>
+                </div>
+                <a href="https://www.youtube.com/@sealient" class="social-link-btn">SUBSCRIBE</a>
+            </div>
+            
+            <div class="social-card">
+                <div class="social-icon-container">
+                    <img src="https://i.imgur.com/CCwJk1m.png" alt="Twitch" class="social-icon-img">
+                </div>
+                <div class="social-info">
+                    <h3>Twitch</h3>
+                    <p>Sealient</p>
+                </div>
+                <a href="https://www.twitch.tv/sealient" class="social-link-btn">FOLLOW</a>
+            </div>
+            
+            <div class="social-card">
+                <div class="social-icon-container">
+                    <img src="https://i.imgur.com/yNnWWtg.png" alt="Discord" class="social-icon-img">
+                </div>
+                <div class="social-info">
+                    <h3>Discord</h3>
+                    <p>Sealient Mods</p>
+                </div>
+                <a href="https://discord.gg/vb7Hh5huzS" class="social-link-btn">JOIN</a>
+            </div>
+            
+            <div class="social-card">
+                <div class="social-icon-container">
+                    <img src="https://i.imgur.com/8VY5mFT.png" alt="GitHub" class="social-icon-img">
+                </div>
+                <div class="social-info">
+                    <h3>GitHub</h3>
+                    <p>@Sealient</p>
+                </div>
+                <a href="https://github.com/Sealient" class="social-link-btn">FORK</a>
+            </div>
+            
+            <div class="social-card">
+                <div class="social-icon-container">
+                    <img src="https://i.imgur.com/eH7iIBb.png" alt="Instagram" class="social-icon-img">
+                </div>
+                <div class="social-info">
+                    <h3>Instagram</h3>
+                    <p>@Sealient</p>
+                </div>
+                <a href="https://www.instagram.com/sealient_/" class="social-link-btn">FOLLOW</a>
             </div>
         </div>
+        
+        <div class="direct-contact">
+            <p>Direct neural transmission: <span class="accent">sealient@gmail.com</span></p>
+        </div>
     </div>
+</section>        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2025 NEON<span class="accent">PULSE</span> | SEALIENT COVE</p>
+            </div>
+        </footer>
+    </div>
+
+    <canvas id="webgl-canvas"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-

@@ -1,180 +1,435 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const toggleAboutBtn = document.getElementById("toggleAbout");
-    const toggleSocialsBtn = document.getElementById("toggleSocials");
-    const toggleStatsBtn = document.getElementById("toggleStats");
+// ===== GLOBAL VARIABLES =====
+let scene, camera, renderer;
+let particles, geometry, materials = [];
+let raycaster, mouse, intersects;
+let clock = new THREE.Clock();
+let sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight
+};
 
-    const aboutLayer = document.getElementById("about");
-    const socialsLayer = document.getElementById("socials");
-    const statsLayer = document.getElementById("stats");
+// ===== NEON COLORS =====
+const colors = {
+    primary: 0x9900ff,
+    accent: 0x00ffcc,
+    dark: 0x0a0a12,
+};
 
-    const card = document.querySelector(".card");
+// ===== INITIALIZATION =====
+function init() {
+    // Create scene
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(colors.dark, 0.001);
 
-    // Ensure elements exist before adding event listeners
-    if (toggleAboutBtn && aboutLayer) {
-        toggleAboutBtn.addEventListener("click", () => {
-            aboutLayer.classList.toggle("hidden");
+    // Create camera
+    camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 2000);
+    camera.position.set(0, 0, 50);
+    camera.lookAt(0, 0, 0);
+
+    // Create renderer
+    renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById('webgl-canvas'),
+        antialias: true,
+        alpha: true
+    });
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Create grid
+    createGrid();
+
+    // Create particles
+    createParticles();
+
+    // Create floating objects
+    createFloatingObjects();
+
+    // Create mouse interaction
+    createMouseInteraction();
+
+    // Event listeners
+    window.addEventListener('resize', onWindowResize);
+    document.addEventListener('mousemove', onMouseMove);
+
+    // Start animation loop
+    animate();
+
+    // Hide loading screen after delay
+    setTimeout(() => {
+        document.querySelector('.loading-screen').style.opacity = 0;
+        setTimeout(() => {
+            document.querySelector('.loading-screen').style.display = 'none';
+        }, 1000);
+    }, 2000);
+}
+
+// ===== CREATE GRID =====
+function createGrid() {
+    const gridHelper = new THREE.GridHelper(400, 40, colors.accent, colors.primary);
+    gridHelper.position.y = -30;
+    gridHelper.material.opacity = 0.2;
+    gridHelper.material.transparent = true;
+    scene.add(gridHelper);
+
+    // Create horizontal lines
+    const lineCount = 20;
+    const lineSpacing = 400 / lineCount;
+    
+    for (let i = 0; i <= lineCount; i++) {
+        const lineGeometry = new THREE.BufferGeometry();
+        const linePositions = new Float32Array(6);
+        
+        linePositions[0] = -200;
+        linePositions[1] = -30;
+        linePositions[2] = i * lineSpacing - 200;
+        
+        linePositions[3] = 200;
+        linePositions[4] = -30;
+        linePositions[5] = i * lineSpacing - 200;
+        
+        lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+        
+        const lineMaterial = new THREE.LineBasicMaterial({ 
+            color: i % 4 === 0 ? colors.primary : colors.accent,
+            transparent: true,
+            opacity: 0.2
+        });
+        
+        const line = new THREE.Line(lineGeometry, lineMaterial);
+        scene.add(line);
+    }
+}
+
+// ===== CREATE PARTICLES =====
+function createParticles() {
+    // Create particle system
+    geometry = new THREE.BufferGeometry();
+    const particleCount = 2000;
+    
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+    
+    const color = new THREE.Color();
+    
+    for (let i = 0; i < particleCount; i++) {
+        // Position
+        positions[i * 3] = (Math.random() - 0.5) * 500;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 500;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 500;
+        
+        // Color
+        const colorValue = Math.random();
+        if (colorValue < 0.5) {
+            color.setHSL(0.75, 1, 0.5 + Math.random() * 0.5); // Purple
+        } else {
+            color.setHSL(0.5, 1, 0.5 + Math.random() * 0.5); // Teal
+        }
+        
+        colors[i * 3] = color.r;
+        colors[i * 3 + 1] = color.g;
+        colors[i * 3 + 2] = color.b;
+        
+        // Size
+        sizes[i] = Math.random() * 2;
+    }
+    
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    
+    // Create particle material
+    const particleMaterial = new THREE.PointsMaterial({
+        size: 1,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true
+    });
+    
+    // Create particle system
+    particles = new THREE.Points(geometry, particleMaterial);
+    scene.add(particles);
+}
+
+// ===== CREATE FLOATING OBJECTS =====
+function createFloatingObjects() {
+    // Create floating glowing orbs
+    for (let i = 0; i < 15; i++) {
+        const radius = Math.random() * 3 + 1;
+        const geometry = new THREE.SphereGeometry(radius, 32, 32);
+        
+        // Create the core material
+        const coreMaterial = new THREE.MeshBasicMaterial({
+            color: i % 2 === 0 ? colors.primary : colors.accent,
+            transparent: true,
+            opacity: 0.7
+        });
+        
+        // Create the glow material
+        const glowMaterial = new THREE.MeshBasicMaterial({
+            color: i % 2 === 0 ? colors.primary : colors.accent,
+            transparent: true,
+            opacity: 0.2
+        });
+        
+        // Create core and glow meshes
+        const core = new THREE.Mesh(geometry, coreMaterial);
+        const glow = new THREE.Mesh(
+            new THREE.SphereGeometry(radius * 1.5, 32, 32),
+            glowMaterial
+        );
+        
+        // Position the orb
+        const orb = new THREE.Group();
+        orb.add(core);
+        orb.add(glow);
+        orb.position.set(
+            (Math.random() - 0.5) * 400,
+            (Math.random() - 0.5) * 300,
+            (Math.random() - 0.5) * 400
+        );
+        
+        // Add to scene
+        scene.add(orb);
+        
+        // Store material for animation
+        materials.push({
+            core: coreMaterial,
+            glow: glowMaterial,
+            mesh: orb,
+            speed: Math.random() * 0.5 + 0.2,
+            radius: radius,
+            offset: Math.random() * Math.PI * 2
         });
     }
+}
 
-    if (toggleSocialsBtn && socialsLayer) {
-        toggleSocialsBtn.addEventListener("click", () => {
-            socialsLayer.classList.toggle("hidden");
+// ===== CREATE MOUSE INTERACTION =====
+function createMouseInteraction() {
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+}
+
+// ===== WINDOW RESIZE =====
+function onWindowResize() {
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
+    
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+    
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+}
+
+// ===== MOUSE MOVE =====
+function onMouseMove(event) {
+    mouse.x = (event.clientX / sizes.width) * 2 - 1;
+    mouse.y = -(event.clientY / sizes.height) * 2 + 1;
+    
+    // Subtle camera movement
+    gsap.to(camera.position, {
+        x: mouse.x * 5,
+        y: mouse.y * 5,
+        duration: 2,
+        ease: "power2.out"
+    });
+}
+
+// ===== ANIMATION =====
+function animate() {
+    requestAnimationFrame(animate);
+    
+    const elapsedTime = clock.getElapsedTime();
+    
+    // Animate particles
+    particles.rotation.y = elapsedTime * 0.05;
+    
+    // Animate floating orbs
+    materials.forEach((material, i) => {
+        const orbit = elapsedTime * material.speed + material.offset;
+        material.mesh.position.y += Math.sin(orbit) * 0.05;
+        
+        // Pulse the glow
+        const pulse = Math.sin(elapsedTime * 2 + i) * 0.5 + 0.5;
+    });
+    
+    renderer.render(scene, camera);
+}
+
+// ===== NAVIGATION =====
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize three.js scene
+    init();
+    
+    // Navigation
+    const navLinks = document.querySelectorAll('nav a');
+    const sections = document.querySelectorAll('.section');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            const targetSectionId = link.getAttribute('data-section');
+            
+            // Update active link
+            navLinks.forEach(link => link.classList.remove('active'));
+            link.classList.add('active');
+            
+            // Show target section
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetSectionId) {
+                    section.classList.add('active');
+                }
+            });
         });
-    }
-
-    if (toggleStatsBtn && statsLayer) {
-        toggleStatsBtn.addEventListener("click", () => {
-            statsLayer.classList.toggle("hidden");
-
-            if (!statsLayer.classList.contains("hidden")) {
-                loadStats();
+    });
+    
+    // Project button
+    const projectsBtn = document.querySelector('.primary-btn');
+    projectsBtn.addEventListener('click', () => {
+        navLinks.forEach(link => link.classList.remove('active'));
+        const projectsLink = document.querySelector('[data-section="projects"]');
+        projectsLink.classList.add('active');
+        
+        sections.forEach(section => {
+            section.classList.remove('active');
+            if (section.id === 'projects') {
+                section.classList.add('active');
             }
         });
-    }
-
-    // Mousemove 3D Effect
-    document.addEventListener("mousemove", (e) => {
-        if (!card) return;
+    });
+    
+    // Connect button
+    const connectBtn = document.querySelector('.secondary-btn');
+    connectBtn.addEventListener('click', () => {
+        navLinks.forEach(link => link.classList.remove('active'));
+        const contactLink = document.querySelector('[data-section="contact"]');
+        contactLink.classList.add('active');
         
-        const xAxis = (window.innerWidth / 2 - e.pageX) / 30;
-        const yAxis = (window.innerHeight / 2 - e.pageY) / 30;
-
-        card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        sections.forEach(section => {
+            section.classList.remove('active');
+            if (section.id === 'contact') {
+                section.classList.add('active');
+            }
+        });
     });
-
-    document.addEventListener("mouseleave", () => {
-        if (card) {
-            card.style.transform = "rotateY(0deg) rotateX(0deg)";
-        }
-    });
-
-    // Fetch and Display Stats
-    async function loadStats() {
-        const statsContainer = document.getElementById("stats-content");
-        if (!statsContainer) return;
-
-        statsContainer.innerHTML = "Loading stats...";
-
-        try {
-            const response = await fetch("https://raw.githubusercontent.com/Sealient/Stats/refs/heads/main/data.json");
-            if (!response.ok) throw new Error("Network response was not ok");
-
-            const data = await response.json();
-            statsContainer.innerHTML = ""; // Clear previous content
-
-            Object.keys(data).forEach((category) => {
-                const header = document.createElement("h4");
-                header.classList.add("stat-header");
-                header.innerText = category;
-                statsContainer.appendChild(header);
-
-                Object.entries(data[category]).forEach(([key, value]) => {
-                    const statItem = document.createElement("div");
-                    statItem.classList.add("stat-item");
-                    statItem.innerHTML = `<span class="stat-label">${key}:</span> <span>${value}</span>`;
-                    statsContainer.appendChild(statItem);
-                });
-            });
-        } catch (error) {
-            statsContainer.innerHTML = "⚠️ Failed to load stats.";
-            console.error("Error loading stats:", error);
-        }
-    }
+    
+    // Create background video lines
+    createBackgroundLines();
+    
+    // Add form submission handler
+    //const contactForm = document.querySelector('.contact-form');
+    //contactForm.addEventListener('submit', (e) => {
+      //  e.preventDefault();
+        
+        // Add success animation
+        //const formElements = contactForm.querySelectorAll('input, textarea, button');
+ //       formElements.forEach(el => {
+   //         el.style.transition = 'all 0.3s ease';
+     //       el.style.borderColor = colors.accent;
+       //     setTimeout(() => {
+         //       el.style.borderColor = '';
+           // }, 1000);
+      //  });
+        
+        // Reset form
+//        contactForm.reset();
+  //  });
 });
 
-document.getElementById("overlay").addEventListener("click", function() {
-    const video = document.getElementById("bg-video");
-    const audio = document.getElementById("bg-audio");
-
-    // Play both video and audio
-    video.play();
-    audio.play();
-
-    // Hide overlay
-    this.classList.add("hidden");
-});
-
-// Timer Element
-const timerElement = document.createElement("div");
-timerElement.classList.add("timer");
-document.body.appendChild(timerElement);
-
-// Function to update the time
-function updateTimer() {
-    const now = new Date();
-    let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    const amPm = hours >= 12 ? "PM" : "AM";
-
-    // Convert to 12-hour format
-    hours = hours % 12 || 12;
-
-    timerElement.innerText = `${hours}:${minutes}:${seconds} ${amPm}`;
+// ===== CREATE BACKGROUND LINES =====
+function createBackgroundLines() {
+    const lineCount = 5;
+    const lines = [];
+    
+    for (let i = 0; i < lineCount; i++) {
+        const line = document.createElement('div');
+        line.classList.add('bg-line');
+        line.style.left = `${Math.random() * 100}%`;
+        line.style.animationDuration = `${Math.random() * 5 + 10}s`;
+        line.style.opacity = `${Math.random() * 0.5 + 0.1}`;
+        document.body.appendChild(line);
+        lines.push(line);
+    }
 }
 
-// Update every second
-setInterval(updateTimer, 1000);
-updateTimer(); // Initialize immediately
-
-// Simulate loading progress with more advanced steps
-const loadingProgress = document.querySelector('.loading-progress');
-const loadingOverlay = document.getElementById('loading-overlay');
-const loadingText = document.querySelector('.loading-text');
-
-let progress = 0;
-
-function updateLoadingBar() {
-    if (progress < 100) {
-        progress += Math.random() * 4 + 2; // Increase progress by random increment (faster)
-
-        // Ensuring the progress doesn't exceed 100
-        if (progress > 100) progress = 100;
+// ===== CURSOR EFFECTS =====
+function initCursorEffects() {
+    const cursor = document.createElement('div');
+    cursor.classList.add('cursor');
+    document.body.appendChild(cursor);
+    
+    window.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+    });
+    
+    // Add hover effects
+    const hoverElements = document.querySelectorAll('a, button, .project-card');
+    hoverElements.forEach(element => {
+        element.addEventListener('mouseenter', () => {
+            cursor.classList.add('cursor-hover');
+        });
         
-        loadingProgress.style.width = `${progress.toFixed(1)}%`;
+        element.addEventListener('mouseleave', () => {
+            cursor.classList.remove('cursor-hover');
+        });
+    });
+}
 
-        // Update feedback text dynamically based on progress
-        if (progress < 30) {
-            loadingText.innerText = "Loading assets...";
-        } else if (progress < 60) {
-            loadingText.innerText = "Setting up... Almost there!";
-        } else if (progress < 90) {
-            loadingText.innerText = "Almost done... Just a few seconds!";
-        } else {
-            loadingText.innerText = "Finishing up...";
+// ===== PRELOAD ASSETS =====
+function preloadAssets() {
+    return new Promise((resolve) => {
+        // Simulate loading
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 10;
+            if (progress >= 100) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 200);
+    });
+}
+
+// ===== INITIALIZE GSAP =====
+// GSAP fallback for the mouse move effect
+if (typeof gsap === 'undefined') {
+    window.gsap = {
+        to: (obj, props) => {
+            const { x, y, duration } = props;
+            const startX = obj.x || 0;
+            const startY = obj.y || 0;
+            const startTime = Date.now();
+            
+            const animate = () => {
+                const elapsedTime = (Date.now() - startTime) / 1000;
+                const progress = Math.min(elapsedTime / duration, 1);
+                
+                if (x !== undefined) obj.x = startX + (x - startX) * progress;
+                if (y !== undefined) obj.y = startY + (y - startY) * progress;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            };
+            
+            requestAnimationFrame(animate);
         }
-    } else {
-        // Hide the loading overlay once done
-        setTimeout(() => {
-            loadingOverlay.style.opacity = '0'; // Fade out the overlay
-            setTimeout(() => {
-                loadingOverlay.style.display = 'none'; // Hide it completely after fade
-            }, 1000);
-        }, 300);
-    }
+    };
 }
 
-// Call the function every 50ms to simulate advanced loading with more dynamic progress
-setInterval(updateLoadingBar, 50);
-
-let currentIndex = 0;
-const items = document.querySelectorAll('.carousel-item');
-const carouselTrack = document.querySelector('.carousel-track');
-
-// Auto change item every 5 seconds
-setInterval(() => {
-    if (currentIndex === items.length - 1) {
-        currentIndex = 0;
-    } else {
-        currentIndex++;
-    }
-    updateCarouselPosition();
-}, 5000);
-
-function updateCarouselPosition() {
-    carouselTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
-}
-
-
-
-
+// Add this to make sure the script runs, even if GSAP is not loaded
+window.addEventListener('DOMContentLoaded', () => {
+    // Initialize cursor effects
+    initCursorEffects();
+    
+    // Preload assets
+    preloadAssets().then(() => {
+        // Start the experience
+        init();
+    });
+});
