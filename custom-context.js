@@ -1,155 +1,173 @@
-// ===== ENHANCED CYBERPUNK CONTEXT MENU =====
+// ===== ENHANCED CUSTOM CONTEXT MENU =====
 document.addEventListener('DOMContentLoaded', function() {
-    // Create context menu element
+    // Create context menu elements
     const contextMenu = document.createElement('div');
     contextMenu.className = 'custom-context-menu';
-    document.body.appendChild(contextMenu);
     
-    // Context menu structure with categories and submenus
+    const subMenuContainer = document.createElement('div');
+    subMenuContainer.className = 'submenu-container';
+    
+    document.body.appendChild(contextMenu);
+    document.body.appendChild(subMenuContainer);
+    
+    // Context menu configuration with nested submenus and enhanced options
     const menuItems = [
         {
-            header: 'NAVIGATION'
-        },
-        {
             icon: '⟳',
-            text: 'Refresh Page',
+            text: 'Refresh',
             shortcut: 'F5',
-            action: () => location.reload(),
-            glitchEffect: true
+            action: () => location.reload()
         },
         {
-            icon: '⇢',
-            text: 'Forward',
-            shortcut: 'Alt+→',
-            action: () => window.history.forward()
-        },
-        {
-            icon: '⇠',
-            text: 'Back',
-            shortcut: 'Alt+←',
-            action: () => window.history.back()
+            icon: '🧭',
+            text: 'Navigation',
+            submenu: [
+                {
+                    icon: '⇢',
+                    text: 'Go Forward',
+                    shortcut: 'Alt+→',
+                    action: () => window.history.forward()
+                },
+                {
+                    icon: '⇠',
+                    text: 'Go Back',
+                    shortcut: 'Alt+←',
+                    action: () => window.history.back()
+                },
+                {
+                    icon: '⌂',
+                    text: 'Go Home',
+                    shortcut: 'Alt+H',
+                    action: () => window.location.href = '/'
+                },
+                {
+                    icon: '↑',
+                    text: 'Scroll to Top',
+                    action: () => window.scrollTo({ top: 0, behavior: 'smooth' })
+                }
+            ]
         },
         { separator: true },
         {
-            header: 'PAGE OPTIONS'
-        },
-        {
-            icon: '✎',
-            text: 'View Content',
+            icon: '📄',
+            text: 'Content',
             submenu: [
                 {
-                    icon: '📄',
-                    text: 'Projects',
+                    icon: '✎',
+                    text: 'View Projects',
                     action: () => navigateToSection('projects')
                 },
                 {
                     icon: '📊',
-                    text: 'Statistics',
-                    action: () => navigateToSection('statistics')
+                    text: 'View Portfolio',
+                    action: () => navigateToSection('portfolio')
                 },
                 {
-                    icon: '📱',
-                    text: 'Portfolio',
-                    action: () => navigateToSection('portfolio')
+                    icon: '📝',
+                    text: 'View Blog',
+                    action: () => navigateToSection('blog')
+                },
+                {
+                    icon: '👤',
+                    text: 'About',
+                    action: () => navigateToSection('about')
+                },
+                {
+                    icon: '✉',
+                    text: 'Contact',
+                    action: () => navigateToSection('contact')
                 }
             ]
-        },
-        {
-            icon: '✉',
-            text: 'Contact',
-            action: () => navigateToSection('contact')
-        },
-        { separator: true },
-        {
-            header: 'SETTINGS'
         },
         {
             icon: '⚙',
-            text: 'Toggle Effects',
-            action: toggleEffects
-        },
-        {
-            icon: '🌙',
-            text: 'Toggle Theme',
-            action: toggleTheme
-        },
-        {
-            icon: '🖥️',
-            text: 'View Mode',
+            text: 'Settings',
             submenu: [
                 {
-                    icon: '👁️',
-                    text: 'Normal Mode',
-                    action: () => setViewMode('normal')
+                    icon: '🎨',
+                    text: 'Toggle Dark Mode',
+                    action: toggleDarkMode
+                },
+                {
+                    icon: '✨',
+                    text: 'Toggle Effects',
+                    action: toggleEffects
                 },
                 {
                     icon: '🔍',
-                    text: 'Focus Mode',
-                    action: () => setViewMode('focus')
+                    text: 'Toggle Zoom',
+                    action: toggleZoom
                 },
                 {
-                    icon: '🎮',
-                    text: 'Immersive Mode',
-                    action: () => setViewMode('immersive')
+                    icon: '🔊',
+                    text: 'Toggle Sound',
+                    action: toggleSound
                 }
             ]
         },
         { separator: true },
         {
-            icon: '❌',
-            text: 'Close Menu',
-            shortcut: 'Esc',
-            action: hideContextMenu,
-            className: 'danger'
+            icon: '📋',
+            text: 'Copy',
+            shortcut: 'Ctrl+C',
+            action: () => document.execCommand('copy')
+        },
+        {
+            icon: '📝',
+            text: 'Paste',
+            shortcut: 'Ctrl+V',
+            action: () => document.execCommand('paste')
+        },
+        {
+            icon: '✂️',
+            text: 'Cut',
+            shortcut: 'Ctrl+X',
+            action: () => document.execCommand('cut')
+        },
+        { separator: true },
+        {
+            icon: '🔗',
+            text: 'Copy Page URL',
+            action: () => {
+                navigator.clipboard.writeText(window.location.href);
+                showNotification('URL copied to clipboard!');
+            }
+        },
+        {
+            icon: '❓',
+            text: 'Help',
+            action: () => showHelp()
         }
     ];
+    
+    // Settings state
+    const settings = {
+        darkMode: false,
+        effectsEnabled: true,
+        zoomEnabled: false,
+        soundEnabled: false
+    };
+    
+    // Track active submenu
+    let activeSubmenu = null;
+    let activeSubmenuTrigger = null;
     
     // Build the menu HTML
     buildContextMenu();
     
     // Context menu event listeners
     document.addEventListener('contextmenu', showContextMenu);
-    document.addEventListener('click', hideContextMenu);
+    document.addEventListener('click', hideAllMenus);
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') hideContextMenu();
-        
-        // Handle keyboard shortcuts
-        if (e.key === 'F5') {
-            e.preventDefault();
-            location.reload();
-        }
-        if (e.altKey && e.key === 'ArrowRight') {
-            e.preventDefault();
-            window.history.forward();
-        }
-        if (e.altKey && e.key === 'ArrowLeft') {
-            e.preventDefault();
-            window.history.back();
-        }
+        if (e.key === 'Escape') hideAllMenus();
     });
-    
-    window.addEventListener('resize', hideContextMenu);
-    
-    // Setup variables to store settings
-    let effectsEnabled = true;
-    let darkTheme = true;
-    let currentViewMode = 'normal';
+    window.addEventListener('resize', hideAllMenus);
     
     // Function to build the context menu
     function buildContextMenu() {
         contextMenu.innerHTML = '';
         
         menuItems.forEach(item => {
-            // If it's a header
-            if (item.header) {
-                const header = document.createElement('div');
-                header.className = 'context-menu-header';
-                header.textContent = item.header;
-                contextMenu.appendChild(header);
-                return;
-            }
-            
-            // If it's a separator
             if (item.separator) {
                 const separator = document.createElement('div');
                 separator.className = 'context-menu-separator';
@@ -157,17 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Regular menu item
             const menuItem = document.createElement('div');
             menuItem.className = 'context-menu-item';
-            if (item.className) {
-                menuItem.classList.add(item.className);
-            }
-            
-            // If has submenu, add class
-            if (item.submenu) {
-                menuItem.classList.add('context-menu-submenu');
-            }
             
             // Create icon
             const iconElement = document.createElement('span');
@@ -179,75 +188,174 @@ document.addEventListener('DOMContentLoaded', function() {
             const textElement = document.createElement('span');
             textElement.className = 'context-menu-text';
             textElement.textContent = item.text;
-            textElement.setAttribute('data-text', item.text); // For glitch effect
             menuItem.appendChild(textElement);
             
-            // Create shortcut if available
-            if (item.shortcut) {
+            // Create submenu indicator or shortcut
+            if (item.submenu) {
+                const submenuIndicator = document.createElement('span');
+                submenuIndicator.className = 'submenu-indicator';
+                submenuIndicator.textContent = '▶';
+                menuItem.appendChild(submenuIndicator);
+                
+                // Handle submenu hover
+                menuItem.addEventListener('mouseenter', (e) => {
+                    showSubmenu(e, item.submenu, menuItem);
+                    
+                    // Add active class to this item
+                    if (activeSubmenuTrigger) {
+                        activeSubmenuTrigger.classList.remove('submenu-active');
+                    }
+                    menuItem.classList.add('submenu-active');
+                    activeSubmenuTrigger = menuItem;
+                });
+            } else if (item.shortcut) {
                 const shortcutElement = document.createElement('span');
                 shortcutElement.className = 'context-menu-shortcut';
                 shortcutElement.textContent = item.shortcut;
                 menuItem.appendChild(shortcutElement);
-            }
-            
-            // Create submenu if available
-            if (item.submenu) {
-                const submenu = document.createElement('div');
-                submenu.className = 'context-submenu';
                 
-                item.submenu.forEach(subItem => {
-                    const subMenuItem = document.createElement('div');
-                    subMenuItem.className = 'context-menu-item';
-                    
-                    // Create icon
-                    const subIconElement = document.createElement('span');
-                    subIconElement.className = 'context-menu-icon';
-                    subIconElement.textContent = subItem.icon;
-                    subMenuItem.appendChild(subIconElement);
-                    
-                    // Create text
-                    const subTextElement = document.createElement('span');
-                    subTextElement.className = 'context-menu-text';
-                    subTextElement.textContent = subItem.text;
-                    subTextElement.setAttribute('data-text', subItem.text); // For glitch effect
-                    subMenuItem.appendChild(subTextElement);
-                    
-                    // Add click handler for submenu item
-                    subMenuItem.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        subItem.action();
-                        hideContextMenu();
-                    });
-                    
-                    submenu.appendChild(subMenuItem);
+                // For regular items, hide any active submenu on hover
+                menuItem.addEventListener('mouseenter', () => {
+                    hideSubmenu();
+                    if (activeSubmenuTrigger) {
+                        activeSubmenuTrigger.classList.remove('submenu-active');
+                        activeSubmenuTrigger = null;
+                    }
                 });
-                
-                menuItem.appendChild(submenu);
+            } else {
+                // For regular items without shortcuts, hide any active submenu on hover
+                menuItem.addEventListener('mouseenter', () => {
+                    hideSubmenu();
+                    if (activeSubmenuTrigger) {
+                        activeSubmenuTrigger.classList.remove('submenu-active');
+                        activeSubmenuTrigger = null;
+                    }
+                });
             }
             
-            // Add click handler for main item (if no submenu)
-            if (!item.submenu) {
-                menuItem.addEventListener('click', () => {
+            // Add click handler
+            menuItem.addEventListener('click', () => {
+                if (!item.submenu && item.action) {
                     item.action();
-                    hideContextMenu();
-                });
-            }
+                    hideAllMenus();
+                }
+            });
             
             contextMenu.appendChild(menuItem);
         });
     }
     
+    // Function to show submenu
+    function showSubmenu(event, submenuItems, parentItem) {
+        // Clear any existing submenu
+        hideSubmenu();
+        
+        // Create submenu
+        const submenu = document.createElement('div');
+        submenu.className = 'custom-submenu';
+        
+        // Build submenu items
+        submenuItems.forEach(subItem => {
+            if (subItem.separator) {
+                const separator = document.createElement('div');
+                separator.className = 'context-menu-separator';
+                submenu.appendChild(separator);
+                return;
+            }
+            
+            const submenuItem = document.createElement('div');
+            submenuItem.className = 'context-menu-item';
+            
+            // Create icon
+            const iconElement = document.createElement('span');
+            iconElement.className = 'context-menu-icon';
+            iconElement.textContent = subItem.icon;
+            submenuItem.appendChild(iconElement);
+            
+            // Create text
+            const textElement = document.createElement('span');
+            textElement.className = 'context-menu-text';
+            textElement.textContent = subItem.text;
+            submenuItem.appendChild(textElement);
+            
+            // Create shortcut if available
+            if (subItem.shortcut) {
+                const shortcutElement = document.createElement('span');
+                shortcutElement.className = 'context-menu-shortcut';
+                shortcutElement.textContent = subItem.shortcut;
+                submenuItem.appendChild(shortcutElement);
+            }
+            
+            // Add click handler
+            submenuItem.addEventListener('click', () => {
+                if (subItem.action) {
+                    subItem.action();
+                    hideAllMenus();
+                }
+            });
+            
+            submenu.appendChild(submenuItem);
+        });
+        
+        // Position submenu next to parent item
+        const parentRect = parentItem.getBoundingClientRect();
+        const mainMenuRect = contextMenu.getBoundingClientRect();
+        
+        // Determine if there's enough space to the right
+        const rightSpace = window.innerWidth - (mainMenuRect.left + mainMenuRect.width);
+        const fitsOnRight = rightSpace >= 200; // Assume submenu width around 200px
+        
+        if (fitsOnRight) {
+            submenu.style.left = `${mainMenuRect.width}px`;
+            submenu.style.top = `${parentRect.top - mainMenuRect.top}px`;
+        } else {
+            // Position to the left if not enough space on right
+            submenu.style.right = `${mainMenuRect.width}px`;
+            submenu.style.left = 'auto';
+            submenu.style.top = `${parentRect.top - mainMenuRect.top}px`;
+        }
+        
+        // Add to container
+        subMenuContainer.innerHTML = '';
+        subMenuContainer.appendChild(submenu);
+        subMenuContainer.style.left = fitsOnRight ? 
+            `${mainMenuRect.left}px` : 
+            `${mainMenuRect.left - 200}px`; // Adjust based on submenu width
+        subMenuContainer.style.top = `${mainMenuRect.top}px`;
+        
+        // Show with animation
+        requestAnimationFrame(() => {
+            submenu.classList.add('active');
+        });
+        
+        activeSubmenu = submenu;
+        
+        // Add glitch effect if effects are enabled
+        if (settings.effectsEnabled) {
+            addGlitchEffect(submenu);
+        }
+    }
+    
+    // Function to hide submenu
+    function hideSubmenu() {
+        if (activeSubmenu) {
+            activeSubmenu.classList.remove('active');
+            activeSubmenu = null;
+        }
+    }
+    
     // Function to show context menu
     function showContextMenu(e) {
         e.preventDefault();
+        hideAllMenus();
         
         // Position the menu
         const posX = e.clientX;
         const posY = e.clientY;
         
         // Check if menu goes outside viewport
-        const menuWidth = 220; // Estimate initial width
-        const menuHeight = 400; // Estimate initial height
+        const menuWidth = 200; // Approximate width before rendering
+        const menuHeight = 400; // Approximate max height before rendering
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         
@@ -268,13 +376,20 @@ document.addEventListener('DOMContentLoaded', function() {
             contextMenu.classList.add('active');
         });
         
-        // Add initial glitch effect
-        addGlitchEffect(contextMenu);
+        // Add glitch effect on menu appearance
+        if (settings.effectsEnabled) {
+            addGlitchEffect(contextMenu);
+        }
     }
     
-    // Function to hide context menu
-    function hideContextMenu() {
+    // Function to hide all menus
+    function hideAllMenus() {
+        hideSubmenu();
         contextMenu.classList.remove('active');
+        if (activeSubmenuTrigger) {
+            activeSubmenuTrigger.classList.remove('submenu-active');
+            activeSubmenuTrigger = null;
+        }
     }
     
     // Function to navigate to a section
@@ -284,372 +399,394 @@ document.addEventListener('DOMContentLoaded', function() {
         const navLink = document.querySelector(`[data-section="${sectionId}"]`);
         
         if (section) {
-            // Add dramatic page transition effect
-            const transition = document.createElement('div');
-            transition.style.position = 'fixed';
-            transition.style.top = '0';
-            transition.style.left = '0';
-            transition.style.width = '100%';
-            transition.style.height = '100%';
-            transition.style.background = 'rgba(153, 0, 255, 0.2)';
-            transition.style.zIndex = '9000';
-            transition.style.opacity = '0';
-            transition.style.transition = 'opacity 0.3s ease';
-            document.body.appendChild(transition);
-            
-            // Animate transition
-            requestAnimationFrame(() => {
-                transition.style.opacity = '1';
-                
-                setTimeout(() => {
-                    // Update active classes
-                    if (navLink) {
-                        document.querySelectorAll('nav a').forEach(link => {
-                            link.classList.remove('active');
-                        });
-                        navLink.classList.add('active');
-                    }
-                    
-                    document.querySelectorAll('.section').forEach(s => {
-                        s.classList.remove('active');
-                    });
-                    section.classList.add('active');
-                    
-                    // Fade out transition
-                    transition.style.opacity = '0';
-                    
-                    // Remove transition element
-                    setTimeout(() => {
-                        document.body.removeChild(transition);
-                    }, 300);
-                    
-                    // Show notification
-                    showNotification('Navigation', `Navigated to ${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`);
-                }, 300);
+            // If section exists, make it active
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
             });
+            section.classList.add('active');
+            
+            // Scroll to section
+            section.scrollIntoView({ behavior: 'smooth' });
+            
+            // Update nav link if it exists
+            if (navLink) {
+                document.querySelectorAll('nav a').forEach(link => {
+                    link.classList.remove('active');
+                });
+                navLink.classList.add('active');
+            }
+            
+            showNotification(`Navigated to ${sectionId}`);
+        } else {
+            showNotification(`Section "${sectionId}" not found`, 'error');
         }
     }
     
-    // Function to toggle effects
+    // Toggle functions
+    function toggleDarkMode() {
+        settings.darkMode = !settings.darkMode;
+        document.body.classList.toggle('dark-mode', settings.darkMode);
+        showNotification(settings.darkMode ? 'Dark Mode Enabled' : 'Light Mode Enabled');
+    }
+    
     function toggleEffects() {
-        effectsEnabled = !effectsEnabled;
-        
-        // Apply effect changes
-        document.body.classList.toggle('effects-disabled', !effectsEnabled);
+        settings.effectsEnabled = !settings.effectsEnabled;
         
         // Find Three.js canvas and adjust
         const canvas = document.getElementById('webgl-canvas');
         if (canvas) {
-            canvas.style.opacity = effectsEnabled ? '1' : '0.3';
-            canvas.style.transition = 'opacity 0.5s ease';
+            canvas.style.opacity = settings.effectsEnabled ? '1' : '0.3';
         }
         
-        // Update menu option text
-        const effectsItem = menuItems.find(item => item.text === 'Toggle Effects');
-        if (effectsItem) {
-            effectsItem.text = effectsEnabled ? 'Toggle Effects' : 'Enable Effects';
-            buildContextMenu();
-        }
+        // Remove or add effects class to body
+        document.body.classList.toggle('effects-disabled', !settings.effectsEnabled);
         
-        // Apply glitch effect to body
-        if (effectsEnabled) {
-            addBodyGlitch();
-        }
-        
-        // Show notification
-        showNotification('Settings', effectsEnabled ? 'Visual Effects Enabled' : 'Visual Effects Disabled');
+        showNotification(settings.effectsEnabled ? 'Effects Enabled' : 'Effects Disabled');
     }
     
-    // Function to toggle theme
-    function toggleTheme() {
-        darkTheme = !darkTheme;
+    function toggleZoom() {
+        settings.zoomEnabled = !settings.zoomEnabled;
         
-        // Apply theme changes
-        document.body.classList.toggle('light-theme', !darkTheme);
-        document.body.classList.toggle('dark-theme', darkTheme);
+        // Set zoom level
+        document.body.style.zoom = settings.zoomEnabled ? '110%' : '100%';
         
-        // Add theme transition effect
-        const themeTransition = document.createElement('div');
-        themeTransition.style.position = 'fixed';
-        themeTransition.style.top = '0';
-        themeTransition.style.left = '0';
-        themeTransition.style.width = '100%';
-        themeTransition.style.height = '100%';
-        themeTransition.style.background = darkTheme ? 'rgba(10, 10, 18, 0.3)' : 'rgba(240, 240, 255, 0.3)';
-        themeTransition.style.zIndex = '8000';
-        themeTransition.style.opacity = '0';
-        themeTransition.style.transition = 'opacity 0.5s ease';
-        document.body.appendChild(themeTransition);
+        showNotification(settings.zoomEnabled ? 'Zoom Enabled' : 'Zoom Disabled');
+    }
+    
+    function toggleSound() {
+        settings.soundEnabled = !settings.soundEnabled;
         
-        // Animate theme transition
-        requestAnimationFrame(() => {
-            themeTransition.style.opacity = '1';
-            
+        // Logic to enable/disable sound would go here
+        
+        showNotification(settings.soundEnabled ? 'Sound Enabled' : 'Sound Disabled');
+    }
+    
+    function showHelp() {
+        // Create a help modal or redirect to help page
+        const helpModal = document.createElement('div');
+        helpModal.className = 'help-modal';
+        helpModal.innerHTML = `
+            <div class="help-content">
+                <h2>Help</h2>
+                <p>Right-click anywhere to access the custom context menu.</p>
+                <h3>Keyboard Shortcuts</h3>
+                <ul>
+                    <li><strong>F5</strong> - Refresh page</li>
+                    <li><strong>Alt+←</strong> - Go back</li>
+                    <li><strong>Alt+→</strong> - Go forward</li>
+                    <li><strong>Alt+H</strong> - Go home</li>
+                    <li><strong>Esc</strong> - Close menus</li>
+                </ul>
+                <button class="close-help">Close</button>
+            </div>
+        `;
+        
+        document.body.appendChild(helpModal);
+        
+        // Show with animation
+        setTimeout(() => {
+            helpModal.classList.add('active');
+        }, 10);
+        
+        // Add close button handler
+        helpModal.querySelector('.close-help').addEventListener('click', () => {
+            helpModal.classList.remove('active');
             setTimeout(() => {
-                themeTransition.style.opacity = '0';
-                
-                setTimeout(() => {
-                    document.body.removeChild(themeTransition);
-                }, 500);
-            }, 300);
+                document.body.removeChild(helpModal);
+            }, 300); // Wait for transition to complete
         });
-        
-        // Show notification
-        showNotification('Settings', darkTheme ? 'Dark Theme Activated' : 'Light Theme Activated');
     }
     
-    // Function to set view mode
-    function setViewMode(mode) {
-        currentViewMode = mode;
-        
-        // Remove all previous modes
-        document.body.classList.remove('mode-normal', 'mode-focus', 'mode-immersive');
-        document.body.classList.add(`mode-${mode}`);
-        
-        // Apply specific styles based on mode
-        switch(mode) {
-            case 'focus':
-                // Hide non-essential elements
-                document.querySelectorAll('.non-essential').forEach(el => {
-                    el.style.opacity = '0.3';
-                });
-                document.querySelectorAll('main').forEach(el => {
-                    el.style.maxWidth = '800px';
-                    el.style.margin = '0 auto';
-                });
-                break;
-            case 'immersive':
-                // Enhance visual elements
-                document.querySelectorAll('.visual-element').forEach(el => {
-                    el.style.transform = 'scale(1.05)';
-                });
-                // If a canvas exists, make it more prominent
-                const canvas = document.getElementById('webgl-canvas');
-                if (canvas) {
-                    canvas.style.opacity = '1';
-                    canvas.style.filter = 'saturate(1.2)';
-                }
-                break;
-            default: // normal mode
-                // Reset all customizations
-                document.querySelectorAll('.non-essential').forEach(el => {
-                    el.style.opacity = '1';
-                });
-                document.querySelectorAll('main').forEach(el => {
-                    el.style.maxWidth = '';
-                    el.style.margin = '';
-                });
-                document.querySelectorAll('.visual-element').forEach(el => {
-                    el.style.transform = '';
-                });
-                const defaultCanvas = document.getElementById('webgl-canvas');
-                if (defaultCanvas) {
-                    defaultCanvas.style.filter = '';
-                }
-                break;
-        }
-        
-        // Show notification
-        showNotification('View Mode', `${mode.charAt(0).toUpperCase() + mode.slice(1)} Mode Activated`);
-    }
-    
-    // Function to add a glitch effect to an element
+    // Function to add a glitch effect
     function addGlitchEffect(element) {
-        // Skip effect if disabled
-        if (!effectsEnabled) return;
+        if (!settings.effectsEnabled) return;
         
-        // Create overlay layers for RGB shift effect
-        const colors = ['rgba(255,0,0,0.3)', 'rgba(0,255,0,0.3)', 'rgba(0,0,255,0.3)'];
-        const layers = [];
+        // Create a temporary glitch overlay
+        const glitchEl = document.createElement('div');
+        glitchEl.className = 'glitch-overlay';
+        element.appendChild(glitchEl);
         
-        colors.forEach((color, index) => {
-            const layer = document.createElement('div');
-            layer.style.position = 'absolute';
-            layer.style.top = '0';
-            layer.style.left = '0';
-            layer.style.right = '0';
-            layer.style.bottom = '0';
-            layer.style.zIndex = '-1';
-            layer.style.backgroundColor = color;
-            layer.style.mixBlendMode = 'lighten';
-            layer.style.pointerEvents = 'none';
-            layer.style.opacity = '0.5';
-            layer.style.transform = `translate(${(index-1)*3}px, ${(index-1)*-2}px)`;
-            layers.push(layer);
-            element.appendChild(layer);
-        });
-        
-        // Animate RGB shift
-        let frame = 0;
-        const glitchInterval = setInterval(() => {
-            frame++;
+        // Add random glitch offsets
+        setTimeout(() => {
+            element.classList.add('glitch-effect');
             
-            if (frame < 12) {
-                layers.forEach((layer, index) => {
-                    const offsetX = Math.sin(frame * 0.8) * (index - 1) * 2;
-                    const offsetY = Math.cos(frame * 0.8) * (index - 1) * 1.5;
-                    layer.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-                    layer.style.opacity = Math.max(0, 0.5 - frame * 0.04);
-                });
-            } else {
-                clearInterval(glitchInterval);
-                layers.forEach(layer => element.removeChild(layer));
-            }
+            // Remove the glitch effect after a short time
+            setTimeout(() => {
+                element.classList.remove('glitch-effect');
+                if (glitchEl.parentNode === element) {
+                    element.removeChild(glitchEl);
+                }
+            }, 300);
         }, 50);
     }
     
-    // Function to add full-screen glitch effect
-    function addBodyGlitch() {
-        // Create overlay for full-screen glitch
-        const glitchOverlay = document.createElement('div');
-        glitchOverlay.style.position = 'fixed';
-        glitchOverlay.style.top = '0';
-        glitchOverlay.style.left = '0';
-        glitchOverlay.style.width = '100%';
-        glitchOverlay.style.height = '100%';
-        glitchOverlay.style.zIndex = '9500';
-        glitchOverlay.style.pointerEvents = 'none';
-        glitchOverlay.style.overflow = 'hidden';
-        document.body.appendChild(glitchOverlay);
-        
-        // Create glitch lines
-        for (let i = 0; i < 10; i++) {
-            const line = document.createElement('div');
-            line.style.position = 'absolute';
-            line.style.height = `${Math.random() * 5 + 1}px`;
-            line.style.width = '100%';
-            line.style.background = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 0.3 + 0.1})`;
-            line.style.top = `${Math.random() * 100}%`;
-            line.style.left = '0';
-            line.style.transform = `translateX(${Math.random() > 0.5 ? '-' : ''}100%)`;
-            line.style.boxShadow = '0 0 8px rgba(0, 255, 204, 0.5)';
-            glitchOverlay.appendChild(line);
-            
-            // Animate the line
-            gsapAnimation(line);
-        }
-        
-        // Remove overlay after animation
-        setTimeout(() => {
-            document.body.removeChild(glitchOverlay);
-        }, 1000);
-    }
-    
-    // Simulated GSAP animation (since we can't actually use GSAP)
-    function gsapAnimation(element) {
-        const startPosition = -100;
-        const endPosition = 100;
-        const duration = 400 + Math.random() * 600;
-        const startTime = Date.now();
-        
-        function animate() {
-            const elapsedTime = Date.now() - startTime;
-            const progress = Math.min(elapsedTime / duration, 1);
-            
-            // Ease in-out cubic function
-            let easedProgress;
-            if (progress < 0.5) {
-                easedProgress = 4 * progress * progress * progress;
-            } else {
-                easedProgress = 1 - Math.pow(-2 * progress + 2, 3) / 2;
-            }
-            
-            const currentPosition = startPosition + (endPosition - startPosition) * easedProgress;
-            element.style.transform = `translateX(${currentPosition}%)`;
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        }
-        
-        animate();
-    }
-    
-    // Function to show styled notification
-    function showNotification(title, message) {
-        // Remove existing notification
+    // Function to show notification
+    function showNotification(message, type = 'info') {
+        // Check if notification element exists, create if not
         let notification = document.querySelector('.custom-notification');
-        if (notification) {
-            document.body.removeChild(notification);
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.className = 'custom-notification';
+            document.body.appendChild(notification);
         }
         
-        // Create new notification
-        notification = document.createElement('div');
-        notification.className = 'custom-notification';
+        // Set message and type
+        notification.textContent = message;
+        notification.className = `custom-notification notification-${type}`;
         
-        // Add title and message
-        const titleElement = document.createElement('div');
-        titleElement.className = 'notification-title';
-        titleElement.textContent = title;
-        notification.appendChild(titleElement);
-        
-        const messageElement = document.createElement('div');
-        messageElement.className = 'notification-message';
-        messageElement.textContent = message;
-        notification.appendChild(messageElement);
-        
-        // Add to document
-        document.body.appendChild(notification);
-        
-        // Trigger animation
-        setTimeout(() => {
+        // Show notification
+        requestAnimationFrame(() => {
             notification.classList.add('active');
-            
-            // Trigger glitch effect
-            if (effectsEnabled) {
-                addGlitchEffect(notification);
-            }
-            
-            // Hide after delay
-            setTimeout(() => {
-                notification.classList.remove('active');
-                
-                // Remove after animation completes
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        document.body.removeChild(notification);
-                    }
-                }, 400);
-            }, 3000);
-        }, 10);
-    }
-    
-    // Function to add keyboard shortcuts
-    function setupKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            // Ctrl+Shift+E to toggle effects
-            if (e.ctrlKey && e.shiftKey && e.key === 'E') {
-                e.preventDefault();
-                toggleEffects();
-            }
-            
-            // Ctrl+Shift+T to toggle theme
-            if (e.ctrlKey && e.shiftKey && e.key === 'T') {
-                e.preventDefault();
-                toggleTheme();
-            }
-            
-            // Ctrl+Shift+[1-3] to change view modes
-            if (e.ctrlKey && e.shiftKey && e.key === '1') {
-                e.preventDefault();
-                setViewMode('normal');
-            }
-            if (e.ctrlKey && e.shiftKey && e.key === '2') {
-                e.preventDefault();
-                setViewMode('focus');
-            }
-            if (e.ctrlKey && e.shiftKey && e.key === '3') {
-                e.preventDefault();
-                setViewMode('immersive');
-            }
         });
+        
+        // Add glitch effect if enabled
+        if (settings.effectsEnabled) {
+            addGlitchEffect(notification);
+        }
+        
+        // Play sound if enabled
+        if (settings.soundEnabled) {
+            const sound = new Audio();
+            sound.src = type === 'error' ? 'error.mp3' : 'notification.mp3';
+            sound.volume = 0.5;
+            sound.play().catch(() => {}); // Catch and ignore any autoplay restrictions
+        }
+        
+        // Hide after delay
+        setTimeout(() => {
+            notification.classList.remove('active');
+        }, 3000);
     }
     
-    // Setup keyboard shortcuts
-    setupKeyboardShortcuts();
-    
-    // Initial notification
-    setTimeout(() => {
-        showNotification('System', 'Right-click to access the cyberpunk context menu');
-    }, 1000);
+    // Add CSS styles for enhanced context menu
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+        /* Context Menu Styles */
+        .custom-context-menu,
+        .custom-submenu {
+            position: absolute;
+            background: rgba(20, 20, 25, 0.95);
+            border: 1px solid var(--accent, #9900ff);
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(153, 0, 255, 0.4);
+            min-width: 180px;
+            max-width: 250px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            transform: scale(0.98) translateY(-5px);
+            transform-origin: top left;
+            transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+            overflow: hidden;
+            padding: 6px 0;
+        }
+        
+        .custom-context-menu.active,
+        .custom-submenu.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        
+        .context-menu-item {
+            padding: 8px 14px;
+            color: #eee;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            position: relative;
+            font-family: var(--font-main, sans-serif);
+            transition: background 0.2s;
+        }
+        
+        .context-menu-item:hover {
+            background: rgba(153, 0, 255, 0.2);
+        }
+        
+        .context-menu-icon {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+            color: var(--accent, #9900ff);
+        }
+        
+        .context-menu-text {
+            flex-grow: 1;
+        }
+        
+        .context-menu-shortcut {
+            margin-left: 14px;
+            opacity: 0.5;
+            font-size: 12px;
+        }
+        
+        .context-menu-separator {
+            height: 1px;
+            background: rgba(153, 0, 255, 0.3);
+            margin: 5px 0;
+        }
+        
+        .submenu-indicator {
+            font-size: 10px;
+            margin-left: 8px;
+            opacity: 0.7;
+        }
+        
+        .submenu-container {
+            position: absolute;
+            z-index: 1001;
+            pointer-events: none;
+        }
+        
+        .custom-submenu {
+            pointer-events: all;
+        }
+        
+        .submenu-active {
+            background: rgba(153, 0, 255, 0.2);
+        }
+        
+        /* Notification Styles */
+        .custom-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(20, 20, 25, 0.9);
+            color: var(--accent, #9900ff);
+            padding: 12px 20px;
+            border-radius: 6px;
+            z-index: 2000;
+            font-family: var(--font-main, sans-serif);
+            font-size: 14px;
+            border: 1px solid var(--accent, #9900ff);
+            box-shadow: 0 0 15px rgba(153, 0, 255, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            max-width: 300px;
+            backdrop-filter: blur(8px);
+        }
+        
+        .custom-notification.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification-error {
+            border-color: #ff3366;
+            color: #ff3366;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+        }
+        
+        /* Help Modal */
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .help-modal.active {
+            opacity: 1;
+        }
+        
+        .help-content {
+            background: rgba(20, 20, 25, 0.95);
+            border: 1px solid var(--accent, #9900ff);
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            width: 80%;
+            color: #eee;
+            font-family: var(--font-main, sans-serif);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(153, 0, 255, 0.4);
+        }
+        
+        .help-content h2 {
+            color: var(--accent, #9900ff);
+            margin-top: 0;
+        }
+        
+        .help-content button {
+            background: var(--accent, #9900ff);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .help-content button:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 10px rgba(153, 0, 255, 0.6);
+        }
+        
+        /* Glitch effect */
+        .glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(153, 0, 255, 0.2);
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .glitch-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glitch-effect:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -5px;
+            width: 3px;
+            height: 100%;
+            background: var(--accent, #9900ff);
+            opacity: 0.7;
+            animation: glitch-line 0.3s linear;
+        }
+        
+        .glitch-effect:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -5px;
+            width: 3px;
+            height: 100%;
+            background: #00ffcc;
+            opacity: 0.7;
+            animation: glitch-line 0.3s linear reverse;
+        }
+        
+        @keyframes glitch-line {
+            0% { transform: translateY(-100%); }
+            50% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
+        }
+        
+        /* Dark mode */
+        body.dark-mode {
+            background: #111;
+            color: #eee;
+        }
+    `;
+    document.head.appendChild(styleEl);
 });
