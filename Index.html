@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seal's Cove</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="background"></div>
+    <div class="neon-grid"></div>
+    
+    <header>
+        <h1 class="neon-text">Welcome to the Cove</h1>
+    </header>
+
+    <main>
+        <section class="hero">
+            <p class="intro-text">"Hey, I'm Seal. I'm not here to be loud — I'm here to be real. I stream games that keep me thinking, challenge me, or just vibe with who I am. No fake reactions. Just me, my games, and a space to be honest."</p>
+            
+            <nav class="main-nav">
+                <button class="neon-btn active" data-section="about">About Me</button>
+                <button class="neon-btn" data-section="games">Games I Play</button>
+                <button class="neon-btn" data-section="rules">Rules</button>
+                <button class="neon-btn" data-section="discord">Live Status</button>
+                <button class="neon-btn" data-section="faq">FAQ</button>
+                <button class="neon-btn" data-section="support">Support</button>
+            </nav>
+        </section>
+
+        <div class="content-container">
+            <!-- About Me Section -->
+            <section id="about" class="content-section">
+                <div class="two-column">
+                    <div class="text-column">
+                        <h2>About Seal</h2>
+                        <ul class="info-list">
+                            <li><span class="neon-accent">Name:</span> Seal (or Sealient)</li>
+                            <li><span class="neon-accent">Pronouns:</span> He/Him</li>
+                            <li><span class="neon-accent">Age:</span> 17</li>
+                            <li><span class="neon-accent">Location:</span> Anaheim, CA</li>
+                            <li><span class="neon-accent">Attachment Style:</span> Anxious preoccupied (I'm working through it)</li>
+                            <li><span class="neon-accent">Vibe:</span> Calm, loyal, emotionally real</li>
+                            <li><span class="neon-accent">Fun Fact:</span> I've played soccer for 13 years.</li>
+                        </ul>
+                        <div class="quote-box">
+                            <p>"My stream is for the people who feel a little too much, think a little too long, and just want a space where they can exist without pressure."</p>
+                        </div>
+                    </div>
+                    <div class="image-column">
+                        <div class="seal-portrait"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Games Section -->
+            <section id="games" class="content-section hidden">
+                <h2>Games I Play</h2>
+                <div class="games-grid">
+                    <div class="game-tile" data-game="apex">
+                        <div class="game-icon">⚔️</div>
+                        <h3>Multiplayer Shooters / Strategy</h3>
+                        <div class="game-desc">
+                            <p><strong>The Finals:</strong> Ranked grind, smart plays — not just chasing kills</p>
+                            <p><strong>Overwatch:</strong> Support main with a protective playstyle</p>
+                            <p><strong>Valorant:</strong> Tactical vibes over chaos</p>
+                        </div>
+                    </div>
+                    <div class="game-tile" data-game="competitive">
+                        <div class="game-icon">🎯</div>
+                        <h3>Competitive & Replayable</h3>
+                        <div class="game-desc">
+                            <p><strong>Rocket League:</strong> Precision, teamwork, growth</p>
+                            <p><strong>CS2:</strong> Learning curve addict</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-note">
+                    <p>"I don't do long RPGs or story-heavy games. I like challenge, mechanics, and games that respect my time."</p>
+                </div>
+            </section>
+
+            <!-- Rules Section -->
+            <section id="rules" class="content-section hidden">
+                <h2>Stream Rules</h2>
+                <div class="rules-container">
+                    <p class="rules-intro">"This is the Cove. If you're not here to chill, you'll be asked to swim elsewhere."</p>
+                    <ul class="rules-list">
+                        <li>Don't trauma dump (but mental health is valid – we're open, not overwhelming)</li>
+                        <li>Respect everyone, especially neurodivergent folks</li>
+                        <li>No bigotry — period</li>
+                        <li>Don't ask invasive personal questions</li>
+                        <li>No Gen Z party culture spam (no "drink up" garbage)</li>
+                        <li>Be chill, be real, or be gone</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Premium Discord Section -->
+            <section id="discord" class="content-section hidden">
+                <h2>Seal's Live Status</h2>
+                <div class="discord-premium">
+                    <div class="discord-header">
+                        <i class="fab fa-discord neon-icon"></i>
+                        <h3>REAL-TIME PRESENCE</h3>
+                    </div>
+                    <div class="discord-profile">
+                        <!-- Dynamic content loaded via JavaScript -->
+                        <p class="api-loading">Loading presence data...</p>
+                    </div>
+                    <div class="discord-activity">
+                        <div class="activity-glow"></div>
+                        <p class="no-activity">Checking current activity...</p>
+                    </div>
+                    <button class="neon-btn discord-join">
+                        <i class="fas fa-share"></i> Join the Cove
+                    </button>
+                </div>
+                
+                <div class="community-section">
+                    <h3>Sealient's Cove Community</h3>
+                    <p>"We're a small Discord crew of gamers, artists, thinkers, and night owls. We value loyalty, good convos, and shared peace. Come through if you want a place where people care more about you than your followers."</p>
+                    
+                    <div class="roles-section">
+                        <h4>Community Roles</h4>
+                        <div class="role-tags">
+                            <span class="role-tag">Gamer</span>
+                            <span class="role-tag">Lurker</span>
+                            <span class="role-tag">Softcore Strategist</span>
+                            <span class="role-tag">Support Main</span>
+                        </div>
+                    </div>
+                    
+                    <div class="gallery-section">
+                        <h4>Community Moments</h4>
+                        <div class="gallery-grid">
+                            <div class="gallery-item"></div>
+                            <div class="gallery-item"></div>
+                            <div class="gallery-item"></div>
+                            <div class="gallery-item"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq" class="content-section hidden">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-container">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Are you a pro gamer?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Nah. I just love learning and improving.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>Why don't you stream certain games?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Story-heavy games and RPGs just don't hit for me. I need something more alive or social.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>You okay? You seem quiet sometimes.</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>I'm good — just wired differently. I stream to feel instead of fake it.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <h3>How do you stay calm?</h3>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="faq-answer">
+                            <p>Music, games, and knowing this is my space. I don't owe anyone a performance.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Support Section -->
+            <section id="support" class="content-section hidden">
+                <h2>Support the Cove</h2>
+                <div class="support-content">
+                    <p>"I don't stream for money — but if you believe in what I'm building, you can help keep the Cove lit."</p>
+                    
+                    <div class="support-options">
+                        <div class="support-option">
+                            <i class="fas fa-coffee"></i>
+                            <h3>Ko-fi</h3>
+                            <button class="neon-btn support-btn">Donate</button>
+                        </div>
+                        <div class="support-option">
+                            <i class="fab fa-paypal"></i>
+                            <h3>PayPal</h3>
+                            <button class="neon-btn support-btn">Contribute</button>
+                        </div>
+                    </div>
+                    
+                    <p class="support-note">"No pressure, ever. Just here if you want to."</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="neurodivergent-note">
+            <p>"This stream welcomes people with AuDHD, bipolar, alexithymia, and more. I get it — you don't have to explain yourself here."</p>
+        </div>
+        <div class="setup-info">
+            <h3>My Setup</h3>
+            <ul>
+                <li>PC: ~$1000 </li>
+                <li>Keyboard: Glorious GMMK2 Pro 96%</li>
+                <li>Mic: Fifine AM8</li>
+                <li>Mouse: Logitech G502 Hero</li>
+                <li>Monitor + LED lights</li>
+            </ul>
+        </div>
+        <p class="copyright">© 2025 Seal's Cove. All vibes reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
