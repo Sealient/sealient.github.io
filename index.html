@@ -139,6 +139,38 @@
 /* Card list items */
 .card-content ul { padding-left:20px; margin:0; }
 .card-content li { margin-bottom:6px; }
+#screen-block {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  z-index: 999999;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  backdrop-filter: blur(6px);
+}
+
+#screen-block .screen-block-box {
+  background: #151515;
+  padding: 40px 60px;
+  border-radius: 20px;
+  border: 2px solid #ffffff22;
+  box-shadow: 0 0 40px rgba(0, 132, 255, 0.35);
+}
+
+#screen-block h1 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+#screen-block p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
 </style>
 </head>
 <body>
@@ -311,6 +343,15 @@
 </section>
   </main>
 </div>
+
+<div id="screen-block">
+  <div class="screen-block-box">
+    <h1>⚠️ Unsupported Screen Size</h1>
+    <p>This website is optimized for standard desktop resolutions only.</p>
+    <p>Please resize your browser or switch to a screen around 1080p.</p>
+  </div>
+</div>
+
 
 <div id="birthdayPopup" style="
   display:none;
@@ -908,8 +949,24 @@ updateProgressExactly();
     }
 })();
 
+function enforceScreenRange() {
+  const w = window.innerWidth;
 
-</script>
+  // Customize these if needed
+  const minW = 700; 
+  const maxW = 2000;  // 2K fits, 4K gets blocked
+
+  if (w < minW || w > maxW) {
+    document.getElementById("screen-block").style.display = "flex";
+    document.body.style.overflow = "hidden";
+  } else {
+    document.getElementById("screen-block").style.display = "none";
+    document.body.style.overflow = "auto";
+  }
+}
+
+enforceScreenRange();
+window.addEventListener("resize", enforceScreenRange);</script>
 
 </body>
 </html>
