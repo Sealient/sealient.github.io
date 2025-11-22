@@ -1,237 +1,916 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seal's Cove</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/png" href="favicon.png" />
+<title>Seal's Cove</title>
+<style>
+  :root{
+    --panel-bg: rgba(0,0,0,0.35);
+    --glass-border: rgba(255,255,255,0.15);
+    --muted: rgba(255,255,255,0.85);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:#fff;background:url('https://i.imgur.com/PPoNXeL.jpeg') center/cover fixed no-repeat;-webkit-font-smoothing:antialiased}
+  .main-wrapper{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1100px,92vw);display:flex;gap:28px}
+
+/* Sidebar */
+  .sidebar{width:220px;padding:20px;border-radius:16px;background:rgba(255,255,255,0.06);backdrop-filter:blur(12px) saturate(140%);border:1px solid rgba(255,255,255,0.12);box-shadow:0 10px 30px rgba(0,0,0,0.45)}
+  .sidebar h2{margin:0 0 12px;font-size:18px;letter-spacing:1px;text-transform:uppercase;opacity:0.95}
+  .tab-btn{display:block;width:100%;padding:10px;border-radius:10px;border:0;background:rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;margin-bottom:10px;text-align:left}
+  .tab-btn.active{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));color:#fff}
+
+/* Panel */
+  .panel{flex:1;min-height:520px;padding:24px;border-radius:18px;background:var(--panel-bg);backdrop-filter: blur(10px);border:1px solid var(--glass-border);box-shadow:0 20px 50px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
+  .panel h1{margin:0 0 10px;font-size:20px}
+  .panel p{margin:0 0 12px;color:var(--muted)}
+
+/* ===== Drawing carousel ===== */
+  .carousel-wrapper { width:100%; max-width:720px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .carousel-container { position:relative; width:100%; max-width:700px; height:320px; perspective:1200px; display:flex; justify-content:center; align-items:center; }
+  .carousel { width:100%; height:100%; transform-style:preserve-3d; transition: transform .5s ease; position:relative; }
+  .carousel-card { position:absolute; top:50%; left:50%; width:180px; height:260px; border-radius:16px; background-size:cover; background-position:center; box-shadow:0 15px 50px rgba(0,0,0,0.45); transform-style:preserve-3d; transition: transform .45s ease, box-shadow .45s ease; cursor:pointer }
+  .carousel-card:hover { transform: translate(-50%,-50%) translateZ(50px) scale(1.05); box-shadow:0 25px 80px rgba(0,0,0,0.7) }
+
+  .carousel-caption { position:absolute; bottom:-26px; left:50%; transform:translateX(-50%); background: rgba(0,0,0,0.6); padding:6px 10px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .25s }
+  .carousel-card:hover .carousel-caption { opacity:1 }
+
+  .carousel-btn { position:absolute; top:50%; transform:translateY(-50%); background: rgba(255,255,255,0.08); border:none; color:#fff; font-size:26px; width:38px; height:38px; display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius:50%; user-select:none; z-index:5; transition:background .2s }
+  .carousel-btn:hover { background: rgba(255,255,255,0.18) }
+  .carousel-btn.left { left:6px }
+  .carousel-btn.right { right:6px }
+
+  #carousel-progress { font-size:13px; color:var(--muted) }
+
+/* Modal for drawing image */
+  #draw-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:1200; background:rgba(0,0,0,0); transition:background .35s ease }
+  #draw-modal.active { pointer-events:auto; background:rgba(0,0,0,0.8) }
+  #draw-modal img { max-width:92%; max-height:92%; border-radius:12px; box-shadow:0 30px 90px rgba(0,0,0,0.7); transform: translateZ(-200px) scale(.78); opacity:0; transition: transform .55s ease, opacity .55s ease }
+  #draw-modal img.modal-active { transform: translateZ(0) scale(1); opacity:1 }
+  #draw-modal .download-btn { position:absolute; top:20px; right:20px; padding:8px 10px; font-size:14px; border-radius:8px; border:0; background:rgba(255,255,255,0.12); color:#fff; cursor:pointer; opacity:0; transition:opacity .25s }
+  #draw-modal.active .download-btn { opacity:1 }
+
+/* ===== Coding tab styles (reused earlier) ===== */
+  .project-grid{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:12px}
+  .project-card{background:rgba(255,255,255,0.03);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;gap:8px;min-height:110px}
+  .project-card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(0,0,0,0.5)}
+  .project-title{font-weight:700}
+  .project-desc{font-size:13px;color:var(--muted)}
+
+  .scripts-list{width:100%;display:flex;flex-direction:column;gap:8px;max-height:320px;overflow:auto;padding-right:6px}
+  .script-item{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .script-meta{display:flex;flex-direction:column}
+  .script-name{font-weight:700}
+  .script-desc{font-size:13px;color:var(--muted)}
+  .script-controls{display:flex;gap:8px}
+  .btn-sm{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);padding:6px 8px;border-radius:8px;cursor:pointer;color:#fff;font-size:13px}
+
+  .list-section{width:100%;margin-bottom:12px}
+  .list-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+  .list-body{margin-top:8px;display:none;flex-direction:column;gap:8px}
+  .list-body.active{display:flex}
+
+/* Project modal (re-usable for coding tab) */
+  .project-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:1100; background:rgba(0,0,0,0); transition:background .35s ease; }
+  .project-modal.active{pointer-events:auto;background:rgba(0,0,0,0.84)}
+  .project-modal .card{ width:min(880px,92vw); max-height:86vh; overflow:auto; background:rgba(8,8,8,0.7); border-radius:14px; padding:20px; border:1px solid rgba(255,255,255,0.06); transform:scale(.95); transition:transform .33s ease,opacity .33s ease; opacity:0 }
+  .project-modal.active .card{transform:scale(1); opacity:1}
+  .project-modal .close{ position:absolute; top:18px; right:24px; font-size:22px; cursor:pointer; color:#fff; background:transparent; border:0 }
+
+  pre.code-block{background:rgba(0,0,0,0.45);padding:12px;border-radius:10px;overflow:auto;white-space:pre-wrap;font-size:13px;margin:8px 0;border:1px solid rgba(255,255,255,0.04)}
+  .small-note{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* discord preview look-at-cursor */
+  #discord-preview { width:100%; max-width:520px; display:block; margin:14px auto 0; border-radius:12px; transition: transform .12s ease-out; transform-style:preserve-3d; box-shadow:0 20px 60px rgba(0,0,0,0.6); pointer-events:none; }
+
+/* small responsive */
+  @media (max-width:900px){
+    #discord-preview{max-width:90%}
+    #draw-modal img{max-width:94%}
+    .project-modal .card{width:94vw}
+  }
+
+  /* Streamer Dashboard Styles */
+  .stream-dashboard { display:flex; justify-content:center; margin-top:18px; }
+  .stream-card { background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(12px) saturate(140%); border-radius:16px; padding:24px; width:100%; max-width:680px; display:flex; flex-direction:column; align-items:center; gap:18px; transition: transform .25s ease, box-shadow .25s ease; cursor:pointer; box-shadow:0 15px 50px rgba(0,0,0,0.45); }
+  .stream-card:hover { transform:rotateX(3deg) rotateY(5deg) scale(1.01); box-shadow:0 25px 60px rgba(0,0,0,0.6); }
+  .profile-wrapper { position:relative; width:110px; height:110px; }
+  .profile-pic { width:100%; height:100%; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.15); }
+  .status-indicator { position:absolute; bottom:4px; right:4px; width:18px; height:18px; border-radius:50%; border:2px solid rgba(0,0,0,0.5); background:red; box-shadow:0 0 12px red; transition: box-shadow .3s ease, transform .3s ease; }
+  .status-indicator.live { background:#4ade80; box-shadow:0 0 12px #4ade80; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100% { transform:scale(1); box-shadow:0 0 12px #4ade80; } 50% { transform:scale(1.3); box-shadow:0 0 20px #4ade80; } }
+
+  .stream-info { text-align:center; color:#fff; display:flex; flex-direction:column; gap:8px; }
+  .stream-info h2 { margin:0;font-size:20px;letter-spacing:0.5px; }
+  .stream-info p { margin:0;font-size:14px;color:rgba(255,255,255,0.85); }
+
+  .stream-buttons { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
+  .btn-stream { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); padding:8px 14px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; transition: all .25s ease; }
+  .btn-stream:hover { background:rgba(255,255,255,0.12); transform:scale(1.05); }
+
+  .schedule { background:rgba(255,255,255,0.05); border-radius:12px; padding:12px 18px; width:100%; text-align:center; color:#fff; font-size:14px; border:1px solid rgba(255,255,255,0.08); }
+  .schedule h3 { margin:0 0 6px; font-size:16px; }
+  .schedule ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; }
+  .schedule li { font-size:14px; }
+  
+/* Dashboard container */
+.dashboard-container { display:flex; flex-direction:column; gap:16px; margin-top:20px; perspective:1200px; }
+
+/* Card styling */
+.dashboard-card { background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(12px) saturate(140%); border-radius:16px; overflow:hidden; color:#fff; transition: transform 0.35s ease, box-shadow 0.35s ease; cursor:pointer; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+.card-header { display:flex; justify-content:space-between; align-items:center; padding:16px; }
+.card-header h2 { margin:0; font-size:18px; letter-spacing:0.5px; }
+.card-icon { font-size:28px; transition: transform 0.3s ease; }
+.toggle-btn { font-size:22px; font-weight:bold; transition: transform 0.3s ease; }
+.card-content { padding:0 16px; max-height:0; overflow:hidden; transition: max-height 0.5s ease, padding 0.3s ease; }
+
+/* Hover & tilt effect */
+.dashboard-card:hover { transform:rotateX(2deg) rotateY(3deg) scale(1.01); box-shadow:0 20px 60px rgba(0,0,0,0.55); }
+.dashboard-card:hover .card-icon { transform:rotate(15deg) scale(1.2); }
+
+/* Expanded card */
+.dashboard-card.expanded .card-content { max-height:500px; padding:16px; }
+.dashboard-card.expanded .toggle-btn { transform: rotate(45deg); }
+
+/* Progress bar */
+.progress-bar { width:100%; height:8px; background:rgba(255,255,255,0.2); border-radius:8px; margin-top:8px; overflow:hidden; }
+.progress { height:100%; background:#4ADE80; border-radius:8px 0 0 8px; width:0%; }
+/* Card list items */
+.card-content ul { padding-left:20px; margin:0; }
+.card-content li { margin-bottom:6px; }
+</style>
 </head>
 <body>
-    <div class="background"></div>
-    <div class="neon-grid"></div>
+
+<div class="main-wrapper">
+  <div class="sidebar">
+    <h2>Portfolio</h2>
+    <button class="tab-btn" data-tab="draw">Drawings</button>
+    <button class="tab-btn active" data-tab="coding">Coding</button>
+    <button class="tab-btn" data-tab="stream">Stream</button>
+    <button class="tab-btn" data-tab="about">About</button>
+  </div>
+
+  <main class="panel" role="main">
+    <!-- DRAWING TAB -->
+    <section id="draw" class="tab-section" style="display:none; width:100%">
+      <h1>My Pencil Art</h1>
+      <p>Hand-drawn pencil Drawings. Click the front image to expand.</p>
+
+      <div class="carousel-wrapper">
+        <div class="carousel-container">
+          <button class="carousel-btn left" id="prev-btn" aria-label="Previous">&#8249;</button>
+          <div class="carousel" id="carousel">
+            <!-- artifacts provided earlier -->
+          <div class="carousel-card" data-title="Artwork 1" style="background-image:url('https://i.imgur.com/qcZ4Wa8.jpeg');">
+            <div class="carousel-caption">The start of a flow! My 4th-ever drawing, focusing on dramatic hair movement and expression. Still learning, but loving the process.</div>
+          </div>
+          <div class="carousel-card" data-title="Artwork 2" style="background-image:url('https://i.imgur.com/4rGvsKv.jpeg');">
+            <div class="carousel-caption">An intense stare. This close-up eye sketch was my 5th drawing. Trying to capture detail and emotion through dramatic lashes and shading.</div>
+          </div>
+          <div class="carousel-card" data-title="Artwork 3" style="background-image:url('https://i.imgur.com/5q7ZR4h.jpeg');">
+            <div class="carousel-caption">Getting into animals! Meet my 11th drawing: a fluffy rabbit portrait. Focused on texture and getting those whiskers just right.</div>
+          </div>
+          <div class="carousel-card" data-title="Artwork 4" style="background-image:url('https://i.imgur.com/zg7cCgg.jpeg');">
+            <div class="carousel-caption">A deep gaze. My 12th drawing ever—experimenting with light, shadow, and a more illustrative style. Happy with the intensity in her eyes!</div>
+          </div>
+          <div class="carousel-card" data-title="Artwork 5" style="background-image:url('https://i.imgur.com/QSJLPvw.jpeg');">
+            <div class="carousel-caption">Anime-style portrait with a furry friend! This is my 13th drawing, working on composition and soft shading. The cat was a fun challenge!</div>
+          </div>
+          </div>
+          <button class="carousel-btn right" id="next-btn" aria-label="Next">&#8250;</button>
+        </div>
+        <div id="carousel-progress">1 / 5</div>
+      </div>
+    </section>
+
+    <!-- CODING TAB -->
+    <section id="coding" class="tab-section" style="display:block; width:100%">
+      <h1>Coding Projects</h1>
+      <p>Click a project card to view details.</p>
+
+      <div class="project-grid" id="project-grid" role="list">
+        <div class="project-card" data-key="discord" role="listitem" tabindex="0">
+          <div><div class="project-title">Discord Theme</div><div class="project-desc">A modern, minimalist Discord Glassmorphic theme.</div></div>
+          <div class="muted">Theme</div>
+        </div>
+
+        <div class="project-card" data-key="tm" role="listitem" tabindex="0">
+          <div><div class="project-title">Tampermonkey Scripts</div><div class="project-desc">A List of all my tampermonkey QoL Scripts</div></div>
+          <div class="muted">Scripts</div>
+        </div>
+
+        <div class="project-card" data-key="roblox" role="listitem" tabindex="0">
+          <div><div class="project-title">Roblox Projects</div><div class="project-desc">UIs & Scripts</div></div>
+          <div class="muted">Roblox</div>
+        </div>
+      </div>
+    </section>
+
+<!-- STREAM TAB -->
+<section id="stream" class="tab-section" style="display:none; width:100%">
+  <h1>Streaming</h1>
+  <p>Catch me live! I try to stream regularly, but sometimes it's sporadic.</p>
+
+  <div class="stream-dashboard">
+    <div class="stream-card" id="stream-card">
+      <div class="profile-wrapper">
+        <img src="https://i.imgur.com/Nd3fUMg.jpeg" alt="Streamer Profile" class="profile-pic">
+        <div class="status-indicator" id="live-indicator"></div>
+      </div>
+      <div class="stream-info">
+        <h2 id="stream-title">Checking status...</h2>
+        <p id="stream-desc">Loading...</p>
+        <div class="stream-buttons">
+          <a href="https://twitch.tv/sealient" target="_blank" class="btn-stream">Twitch</a>
+          <a href="https://www.youtube.com/sealient" target="_blank" class="btn-stream">YouTube</a>
+          <a href="https://kick.com/sealient" target="_blank" class="btn-stream">Kick</a>
+        </div>
+      </div>
+      <div class="schedule">
+        <h3>Stream Schedule</h3>
+        <ul>
+          <li>Monday: 7–10 PM</li>
+          <li>Wednesday: 7-10 PM</li>
+          <li>Friday: 7–10 PM</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT SECTION: Dashboard Style -->
+<section id="about" class="tab-section" style="display:none; width:100%; position:relative;">
+  <h1>About Me</h1>
+
+  <!-- Dashboard container -->
+  <div class="dashboard-container">
+
+    <!-- Personal Info Panel -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <div class="card-icon">👋</div>
+        <h2>Personal Info</h2>
+        <div class="toggle-btn">+</div>
+      </div>
+      <div class="card-content">
+        <p>Hey, I’m Seal. I’m someone who’s still carving out my path, experimenting with different interests, and figuring out what direction fits me best. Right now, I’m focused on building skills, taking on new creative projects, and putting myself in spaces where I can grow.</p>
+      </div>
+    </div>
+
+    <!-- Creative Work Panel -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <div class="card-icon">💻</div>
+        <h2>Creative & Tech Work</h2>
+        <div class="toggle-btn">+</div>
+      </div>
+      <div class="card-content">
+        <ul>
+          <li>Drawing and Digital Art</li>
+          <li>Tampermonkey scripts</li>
+          <li>Roblox UI & gameplay scripts</li>
+          <li>Custom Discord themes</li>
+          <li>Web design & small coding projects</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Hobbies & Community Panel -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <div class="card-icon">🎵</div>
+        <h2>Hobbies & Community</h2>
+        <div class="toggle-btn">+</div>
+      </div>
+      <div class="card-content">
+        <p>Music helps me reset, and gaming has always been a place where I unwind and connect with people. I also run a community called Sealient’s Cove, building a welcoming space and learning how to manage a group.</p>
+      </div>
+    </div>
+
+    <!-- Future Goals Panel -->
+<div class="dashboard-card">
+  <div class="card-header">
+    <div class="card-icon">🌱</div>
+    <h2>Future Goals</h2>
+    <div class="toggle-btn">+</div>
+  </div>
+  <div class="card-content">
+    <p>I’m exploring where I want to go next — college, work, creative paths, or something in between. Even without all the answers, I move forward piece by piece, creating things that feel real and staying true to myself.</p>
     
-    <header>
-        <h1 class="neon-text">Welcome to the Cove</h1>
-    </header>
+    <!-- Dynamic progress bar -->
+    <div class="progress-bar">
+      <div class="progress"></div>
+    </div>
+    <small>Personal growth progress</small>
+  </div>
+</div>
 
-    <main>
-        <section class="hero">
-            <p class="intro-text">"Hey, I'm Seal. I'm not here to be loud — I'm here to be real. I stream games that keep me thinking, challenge me, or just vibe with who I am. No fake reactions. Just me, my games, and a space to be honest."</p>
+  </div>
+</section>
+  </main>
+</div>
+
+<div id="birthdayPopup" style="
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,0.75);
+  padding:30px 40px;
+  border-radius:20px;
+  color:white;
+  backdrop-filter:blur(10px);
+  font-size:20px;
+  text-align:center;
+  z-index:999999;
+  opacity:0;
+  transition:opacity 0.6s ease;
+">
+  🎂 <b>Happy Birthday, Seal!</b><br><br>
+  You leveled up IRL today. Keep creating, keep growing. ✨
+</div>
+
+
+<!-- drawing modal -->
+<div id="draw-modal" aria-hidden="true">
+  <button class="download-btn" id="draw-download" aria-label="Download image">Download</button>
+  <img id="draw-modal-img" src="" alt="Artwork expanded">
+</div>
+
+<!-- coding project modal (reusable) -->
+<div id="project-modal" class="project-modal" aria-hidden="true">
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="proj-title">
+    <button class="close" id="proj-close" aria-label="Close project">✕</button>
+    <div id="proj-content"></div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   Replace these arrays with your real content later
+   ========================= */
+const SCRIPTS = [
+  { name: "Cookie Clicker", desc: "Sleek, fully automated Cookie Clicker enhancer with auto-clicking, building and upgrade management, golden cookie handling, and performance-optimized gameplay.", code: `https://greasyfork.org/en/scripts/556556-cookie-clicker-ultimate` },
+];
+
+const ROBLOX_UIS = [
+  { name: "ReduxV1", img: "https://private-user-images.githubusercontent.com/192563121/500122491-b63acf01-a337-4236-acc4-37fa09d5245a.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjM4MDYxODUsIm5iZiI6MTc2MzgwNTg4NSwicGF0aCI6Ii8xOTI1NjMxMjEvNTAwMTIyNDkxLWI2M2FjZjAxLWEzMzctNDIzNi1hY2M0LTM3ZmEwOWQ1MjQ1YS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMTIyJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTEyMlQxMDA0NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0zZTg0NTIwNGE5ZTFhYTMxNTQ4YjU5ZjVhZDExNmIzZTBhZDY1M2ExNDEzMzFiZjI3ZGYzNTM1OTZiMGY5MWI2JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.vxcG8zcdEB9KICPBmwDkzKAuWxP1Z5G6KnqFets37oc", desc: "For Documentation and to use please visit: https://sealient.github.io/ReduxV1/" },
+];
+
+const ROBLOX_SCRIPTS = [
+  { name: "NSAP Menu (*OP*)", desc: "NSAP Features: Smart ESP, Auto Collector, Player Boosts, World Control, and Visual Enhancements.", code: `For the script please Visit: https://rscripts.net/script/nsap-menu-op-io3q` },
+  { name: "Abyssal *OP* *NO KEY*", desc: "3008- Abyssal features: 👁️ ESP SYSTEMS, 🚀 TELEPORT, 🎮 PLAYER MODS, and ⚡ PERFORMANCE.", code: `For the script please Visit: https://rscripts.net/script/3008-abyssal-op-no-key-GrDU` }
+];
+/* ========================= */
+
+/* ----- tabs setup ----- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
+    document.getElementById(tab).style.display = 'block';
+  });
+});
+
+/* ========== DRAWING CAROUSEL ========== */
+const carousel = document.getElementById('carousel');
+const cards = Array.from(carousel.children);
+const numCards = cards.length;
+const radius = 250; // smaller feel
+let rotation = 0; // degrees
+const angleStep = 360 / numCards;
+
+const progressEl = document.getElementById('carousel-progress');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+
+function positionCards() {
+  for (let i=0;i<numCards;i++){
+    const theta = (i * angleStep) + rotation;
+    cards[i].style.transform = `translate(-50%,-50%) rotateY(${theta}deg) translateZ(${radius}px)`;
+  }
+  // compute current index (front)
+  const normalized = ((Math.round(-rotation / angleStep) % numCards) + numCards) % numCards;
+  progressEl.textContent = `${normalized+1} / ${numCards}`;
+}
+positionCards();
+
+function rotateCarousel(dir){
+  rotation -= dir * angleStep;
+  rotation = Math.round(rotation / angleStep) * angleStep; // snap to step
+  positionCards();
+}
+
+// buttons
+prevBtn.addEventListener('click', ()=> rotateCarousel(-1));
+nextBtn.addEventListener('click', ()=> rotateCarousel(1));
+
+// keyboard nav for drawing
+document.addEventListener('keydown', (e)=>{
+  if (document.getElementById('draw').style.display === 'block') {
+    if (e.key === 'ArrowLeft') rotateCarousel(-1);
+    if (e.key === 'ArrowRight') rotateCarousel(1);
+  }
+});
+
+// parallax tilt on mouse move inside carousel container
+const carouselContainer = document.querySelector('.carousel-container');
+carouselContainer.addEventListener('mousemove', (e)=>{
+  const bounds = carouselContainer.getBoundingClientRect();
+  const x = (e.clientX - bounds.left - bounds.width/2) / bounds.width;
+  const y = (e.clientY - bounds.top - bounds.height/2) / bounds.height;
+  carousel.style.transform = `rotateX(${y*8}deg) rotateY(${x*12}deg)`;
+});
+carouselContainer.addEventListener('mouseleave', ()=>{
+  carousel.style.transform = `rotateX(0deg) rotateY(0deg)`;
+});
+
+/* ---- drawing modal (expand image) ---- */
+const drawModal = document.getElementById('draw-modal');
+const drawModalImg = document.getElementById('draw-modal-img');
+const drawDownload = document.getElementById('draw-download');
+
+function openDrawModal(url, filename){
+  drawModal.classList.add('active');
+  drawModal.setAttribute('aria-hidden','false');
+  drawModalImg.classList.remove('modal-active');
+  drawModalImg.src = url;
+  requestAnimationFrame(()=> requestAnimationFrame(()=> drawModalImg.classList.add('modal-active')));
+  drawDownload.onclick = (e)=>{
+    e.stopPropagation();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || 'artwork';
+    a.click();
+  };
+}
+
+function closeDrawModal(){
+  drawModalImg.classList.remove('modal-active');
+  // wait for transition end
+  const handler = () => {
+    drawModal.classList.remove('active');
+    drawModal.setAttribute('aria-hidden','true');
+    drawModalImg.removeEventListener('transitionend', handler);
+  };
+  drawModalImg.addEventListener('transitionend', handler);
+}
+drawModal.addEventListener('click', (e)=> { if (e.target === drawModal) closeDrawModal(); });
+/* clicking cards opens draw modal */
+cards.forEach(card=>{
+  card.addEventListener('click', ()=>{
+    const bg = card.style.backgroundImage; // url("...")
+    const url = bg.slice(5,-2);
+    openDrawModal(url, card.dataset.title || 'artwork');
+  });
+});
+
+/* ========== CODING TAB ========== */
+const projectCards = Array.from(document.querySelectorAll('.project-card'));
+const projModal = document.getElementById('project-modal');
+const projContent = document.getElementById('proj-content');
+const projClose = document.getElementById('proj-close');
+
+/* discord preview tilt (look at cursor) helpers */
+let discordPreviewEl = null;
+let discordMouseMoveHandler = null;
+
+projectCards.forEach(card=>{
+  card.addEventListener('click', ()=> openProjectModal(card.dataset.key));
+  // support keyboard enter on focused cards
+  card.addEventListener('keydown', (e)=> { if (e.key === 'Enter' || e.key === ' ') openProjectModal(card.dataset.key); });
+});
+
+projClose.addEventListener('click', closeProjectModal);
+projModal.addEventListener('click', (e)=> { if (e.target === projModal) closeProjectModal(); });
+
+function openProjectModal(key){
+  projContent.innerHTML = '';
+  // remove any previous preview handlers
+  removeDiscordPreviewHandlers();
+
+if (key === 'discord') {
+  // Title
+  const h = document.createElement('h2'); 
+  h.id = 'proj-title'; 
+  h.textContent = 'Lumix - A Discord Theme';
+  
+  // Subtitle
+  const p = document.createElement('p'); 
+  p.className = 'muted'; 
+  p.textContent = 'A modern, minimalist Discord Glassmorphic theme.';
+  
+  // Description
+  const desc = document.createElement('p'); 
+  desc.textContent = 'For Any Suggestions, Please Go To Contacts Tab';
+  
+  projContent.appendChild(h);
+  projContent.appendChild(p);
+  projContent.appendChild(desc);
+
+  // Preview image element (will tilt toward cursor)
+  const previewImg = document.createElement('img');
+  previewImg.id = 'discord-preview';
+  previewImg.src = 'https://i.imgur.com/xmlbVhZ.png';
+  previewImg.style.width = '900px'; 
+  previewImg.style.cursor = 'pointer';
+  previewImg.style.transition = 'transform 0.2s ease';
+  projContent.appendChild(previewImg);
+
+// Download button
+// Function to handle the actual download using Blob
+function initiateBlobDownload() {
+    // 1. Fetch the file data
+    fetch('Lumix.css') // Ensure 'your-theme.theme' is in the same folder or use the correct path
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob(); // Get the file content as a Blob object
+        })
+        .then(blob => {
+            // 2. Create a temporary URL from the Blob
+            const url = window.URL.createObjectURL(blob);
             
-            <nav class="main-nav">
-                <button class="neon-btn active" data-section="about">About Me</button>
-                <button class="neon-btn" data-section="games">Games I Play</button>
-                <button class="neon-btn" data-section="rules">Rules</button>
-                <button class="neon-btn" data-section="discord">Live Status</button>
-                <button class="neon-btn" data-section="faq">FAQ</button>
-                <button class="neon-btn" data-section="support">Support</button>
-            </nav>
-        </section>
+            // 3. Create a temporary <a> tag to trigger the download
+            const tempLink = document.createElement('a');
+            tempLink.href = url;
+            tempLink.download = 'Lumix.theme'; // Set the desired filename for the download
+            
+            // 4. Programmatically click the link
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            
+            // 5. Clean up the temporary elements and URL
+            document.body.removeChild(tempLink);
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Error initiating download:', error);
+            alert('Could not download the file. Check the console for details.');
+        });
+}
 
-        <div class="content-container">
-            <!-- About Me Section -->
-            <section id="about" class="content-section">
-                <div class="two-column">
-                    <div class="text-column">
-                        <h2>About Seal</h2>
-                        <ul class="info-list">
-                            <li><span class="neon-accent">Name:</span> Seal (or Sealient)</li>
-                            <li><span class="neon-accent">Pronouns:</span> He/Him</li>
-                            <li><span class="neon-accent">Age:</span> 17</li>
-                            <li><span class="neon-accent">Location:</span> Anaheim, CA</li>
-                            <li><span class="neon-accent">Attachment Style:</span> Anxious preoccupied (I'm working through it)</li>
-                            <li><span class="neon-accent">Vibe:</span> Calm, loyal, emotionally real</li>
-                            <li><span class="neon-accent">Fun Fact:</span> I've played soccer for 13 years.</li>
-                        </ul>
-                        <div class="quote-box">
-                            <p>"My stream is for the people who feel a little too much, think a little too long, and just want a space where they can exist without pressure."</p>
-                        </div>
-                    </div>
-                    <div class="image-column">
-                        <div class="seal-portrait"></div>
-                    </div>
-                </div>
-            </section>
+// Download button creation and styling (as before)
+const downloadBtn = document.createElement('a');
+// The href is not strictly needed for this method, but you can leave it blank or use '#'
+downloadBtn.href = '#'; 
+downloadBtn.textContent = 'Download Theme';
+downloadBtn.className = 'download-btn';
 
-            <!-- Games Section -->
-            <section id="games" class="content-section hidden">
-                <h2>Games I Play</h2>
-                <div class="games-grid">
-                    <div class="game-tile" data-game="apex">
-                        <div class="game-icon">⚔️</div>
-                        <h3>Multiplayer Shooters / Strategy</h3>
-                        <div class="game-desc">
-                            <p><strong>The Finals:</strong> Ranked grind, smart plays — not just chasing kills</p>
-                            <p><strong>Overwatch:</strong> Support main with a protective playstyle</p>
-                            <p><strong>Valorant:</strong> Tactical vibes over chaos</p>
-                        </div>
-                    </div>
-                    <div class="game-tile" data-game="competitive">
-                        <div class="game-icon">🎯</div>
-                        <h3>Competitive & Replayable</h3>
-                        <div class="game-desc">
-                            <p><strong>Rocket League:</strong> Precision, teamwork, growth</p>
-                            <p><strong>CS2:</strong> Learning curve addict</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="section-note">
-                    <p>"I don't do long RPGs or story-heavy games. I like challenge, mechanics, and games that respect my time."</p>
-                </div>
-            </section>
+// --- Styling ---
+downloadBtn.style.display = 'inline-block';
+downloadBtn.style.marginTop = '12px';
+downloadBtn.style.padding = '10px 22px';
+downloadBtn.style.background = 'rgba(255,255,255,0.1)';
+downloadBtn.style.backdropFilter = 'blur(6px)';
+downloadBtn.style.color = '#fff';
+downloadBtn.style.border = '1px solid rgba(255,255,255,0.3)';
+downloadBtn.style.borderRadius = '12px';
+downloadBtn.style.fontWeight = 'bold';
+downloadBtn.style.textDecoration = 'none';
+downloadBtn.style.transition = 'all 0.3s ease';
+downloadBtn.style.cursor = 'pointer';
+downloadBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
 
-            <!-- Rules Section -->
-            <section id="rules" class="content-section hidden">
-                <h2>Stream Rules</h2>
-                <div class="rules-container">
-                    <p class="rules-intro">"This is the Cove. If you're not here to chill, you'll be asked to swim elsewhere."</p>
-                    <ul class="rules-list">
-                        <li>Don't trauma dump (but mental health is valid – we're open, not overwhelming)</li>
-                        <li>Respect everyone, especially neurodivergent folks</li>
-                        <li>No bigotry — period</li>
-                        <li>Don't ask invasive personal questions</li>
-                        <li>No Gen Z party culture spam (no "drink up" garbage)</li>
-                        <li>Be chill, be real, or be gone</li>
-                    </ul>
-                </div>
-            </section>
+projContent.appendChild(downloadBtn);
 
-            <!-- Premium Discord Section -->
-            <section id="discord" class="content-section hidden">
-                <h2>Seal's Live Status</h2>
-                <div class="discord-premium">
-                    <div class="discord-header">
-                        <i class="fab fa-discord neon-icon"></i>
-                        <h3>REAL-TIME PRESENCE</h3>
-                    </div>
-                    <div class="discord-profile">
-                        <!-- Dynamic content loaded via JavaScript -->
-                        <p class="api-loading">Loading presence data...</p>
-                    </div>
-                    <div class="discord-activity">
-                        <div class="activity-glow"></div>
-                        <p class="no-activity">Checking current activity...</p>
-                    </div>
-                    <button class="neon-btn discord-join">
-                        <i class="fas fa-share"></i> Join the Cove
-                    </button>
-                </div>
-                
-                <div class="community-section">
-                    <h3>Sealient's Cove Community</h3>
-                    <p>"We're a small Discord crew of gamers, artists, thinkers, and night owls. We value loyalty, good convos, and shared peace. Come through if you want a place where people care more about you than your followers."</p>
-                    
-                    <div class="roles-section">
-                        <h4>Community Roles</h4>
-                        <div class="role-tags">
-                            <span class="role-tag">Gamer</span>
-                            <span class="role-tag">Lurker</span>
-                            <span class="role-tag">Softcore Strategist</span>
-                            <span class="role-tag">Support Main</span>
-                        </div>
-                    </div>
-                    
-                    <div class="gallery-section">
-                        <h4>Community Moments</h4>
-                        <div class="gallery-grid">
-                            <div class="gallery-item"></div>
-                            <div class="gallery-item"></div>
-                            <div class="gallery-item"></div>
-                            <div class="gallery-item"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+// Hover effect
+downloadBtn.addEventListener('mouseenter', () => {
+    downloadBtn.style.transform = 'scale(1.05)';
+    downloadBtn.style.background = 'rgba(255,255,255,0.15)';
+    downloadBtn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
+});
+downloadBtn.addEventListener('mouseleave', () => {
+    downloadBtn.style.transform = 'scale(1)';
+    downloadBtn.style.background = 'rgba(255,255,255,0.1)';
+    downloadBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+});
 
-            <!-- FAQ Section -->
-            <section id="faq" class="content-section hidden">
-                <h2>Frequently Asked Questions</h2>
-                <div class="faq-container">
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>Are you a pro gamer?</h3>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Nah. I just love learning and improving.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>Why don't you stream certain games?</h3>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Story-heavy games and RPGs just don't hit for me. I need something more alive or social.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>You okay? You seem quiet sometimes.</h3>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>I'm good — just wired differently. I stream to feel instead of fake it.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <div class="faq-question">
-                            <h3>How do you stay calm?</h3>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Music, games, and knowing this is my space. I don't owe anyone a performance.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+// 👈 THIS IS THE CRITICAL CHANGE: Attach the Blob download function to the click event
+downloadBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Stop the default action (like following a '#' link)
+    initiateBlobDownload();
+});
 
-            <!-- Support Section -->
-            <section id="support" class="content-section hidden">
-                <h2>Support the Cove</h2>
-                <div class="support-content">
-                    <p>"I don't stream for money — but if you believe in what I'm building, you can help keep the Cove lit."</p>
-                    
-                    <div class="support-options">
-                        <div class="support-option">
-                            <i class="fas fa-coffee"></i>
-                            <h3>Ko-fi</h3>
-                            <button class="neon-btn support-btn">Donate</button>
-                        </div>
-                        <div class="support-option">
-                            <i class="fab fa-paypal"></i>
-                            <h3>PayPal</h3>
-                            <button class="neon-btn support-btn">Contribute</button>
-                        </div>
-                    </div>
-                    
-                    <p class="support-note">"No pressure, ever. Just here if you want to."</p>
-                </div>
-            </section>
-        </div>
-    </main>
 
-    <footer>
-        <div class="neurodivergent-note">
-            <p>"This stream welcomes people with AuDHD, bipolar, alexithymia, and more. I get it — you don't have to explain yourself here."</p>
-        </div>
-        <div class="setup-info">
-            <h3>My Setup</h3>
-            <ul>
-                <li>PC: ~$1000 </li>
-                <li>Keyboard: Glorious GMMK2 Pro 96%</li>
-                <li>Mic: Fifine AM8</li>
-                <li>Mouse: Logitech G502 Hero</li>
-                <li>Monitor + LED lights</li>
-            </ul>
-        </div>
-        <p class="copyright">© 2025 Seal's Cove. All vibes reserved.</p>
-    </footer>
+  // Small copyright note
+  const note = document.createElement('div'); 
+  note.className='small-note'; 
+  note.textContent = 'Copyright (c) 2025 Seal. All Rights Reserved. For personal use only; modification, redistribution, or commercial use prohibited.';
+  projContent.appendChild(note);
 
-    <script src="script.js"></script>
+  showProjectModal();
+
+  // Look-at-cursor effect
+  attachDiscordPreviewHandlers(previewImg);
+}
+
+  else if (key === 'tm'){
+    const h = document.createElement('h2'); h.textContent = 'Tampermonkey Scripts';
+    const intro = document.createElement('p'); intro.className = 'muted'; intro.textContent = 'Click a script to reveal code. Copy to clipboard using the button.';
+    projContent.appendChild(h); projContent.appendChild(intro);
+
+    const list = document.createElement('div'); list.className = 'scripts-list';
+    SCRIPTS.forEach(s=>{
+      const item = document.createElement('div'); item.className = 'script-item';
+      const meta = document.createElement('div'); meta.className='script-meta';
+      const name = document.createElement('div'); name.className='script-name'; name.textContent = s.name;
+      const d = document.createElement('div'); d.className='script-desc'; d.textContent = s.desc;
+      meta.appendChild(name); meta.appendChild(d);
+      const controls = document.createElement('div'); controls.className='script-controls';
+      const toggle = document.createElement('button'); toggle.className='btn-sm'; toggle.textContent='Show code';
+      const copy = document.createElement('button'); copy.className='btn-sm'; copy.textContent='Copy';
+      const code = document.createElement('pre'); code.className='code-block'; code.style.display='none'; code.textContent = s.code;
+      toggle.addEventListener('click', ()=> {
+        if (code.style.display === 'none'){ code.style.display='block'; toggle.textContent='Hide code'; } else { code.style.display='none'; toggle.textContent='Show code'; }
+      });
+      copy.addEventListener('click', async ()=>{
+        try { await navigator.clipboard.writeText(s.code); copy.textContent='Copied!'; setTimeout(()=> copy.textContent='Copy',900); } catch(e){ copy.textContent='Err'; setTimeout(()=> copy.textContent='Copy',900); }
+      });
+      controls.appendChild(toggle); controls.appendChild(copy);
+      item.appendChild(meta); item.appendChild(controls);
+      projContent.appendChild(item); projContent.appendChild(code);
+      list.appendChild(item);
+    });
+    projContent.appendChild(list);
+    showProjectModal();
+  }
+
+  else if (key === 'roblox'){
+    const h = document.createElement('h2'); h.textContent='Roblox — UIs & Scripts';
+    projContent.appendChild(h);
+    projContent.appendChild(Object.assign(document.createElement('p'), {className:'muted', textContent:'Expand the lists to view items. View images or show/copy code.'}));
+
+    // UI list
+    const uiSection = document.createElement('div'); uiSection.className='list-section';
+    const uiHeader = document.createElement('div'); uiHeader.className='list-header'; uiHeader.innerHTML = `<strong>UI Projects</strong><button class="btn-sm">Toggle</button>`;
+    const uiBody = document.createElement('div'); uiBody.className='list-body';
+    ROBLOX_UIS.forEach(u=>{
+      const row = document.createElement('div'); row.className='script-item';
+      const meta = document.createElement('div'); meta.style.display='flex'; meta.style.flexDirection='column';
+      meta.innerHTML = `<div class="script-name">${u.name}</div><div class="script-desc">${u.desc}</div>`;
+      const controls = document.createElement('div');
+      const viewBtn = document.createElement('button'); viewBtn.className='btn-sm'; viewBtn.textContent='View';
+      viewBtn.addEventListener('click', ()=> openImagePreview(u.img, u.name));
+      controls.appendChild(viewBtn);
+      row.appendChild(meta); row.appendChild(controls);
+      uiBody.appendChild(row);
+    });
+    uiSection.appendChild(uiHeader); uiSection.appendChild(uiBody);
+    projContent.appendChild(uiSection);
+
+    // Scripts list
+    const scriptSection = document.createElement('div'); scriptSection.className='list-section';
+    const scriptHeader = document.createElement('div'); scriptHeader.className='list-header'; scriptHeader.innerHTML = `<strong>Script Projects</strong><button class="btn-sm">Toggle</button>`;
+    const scriptBody = document.createElement('div'); scriptBody.className='list-body';
+    ROBLOX_SCRIPTS.forEach(s=>{
+      const row = document.createElement('div'); row.className='script-item';
+      const meta = document.createElement('div'); meta.style.display='flex'; meta.style.flexDirection='column';
+      meta.innerHTML = `<div class="script-name">${s.name}</div><div class="script-desc">${s.desc}</div>`;
+      const controls = document.createElement('div');
+      const showBtn = document.createElement('button'); showBtn.className='btn-sm'; showBtn.textContent='Show code';
+      const copyBtn = document.createElement('button'); copyBtn.className='btn-sm'; copyBtn.textContent='Copy';
+      const codeBlock = document.createElement('pre'); codeBlock.className='code-block'; codeBlock.style.display='none'; codeBlock.textContent = s.code;
+      showBtn.addEventListener('click', ()=> { codeBlock.style.display = codeBlock.style.display === 'none' ? 'block' : 'none'; showBtn.textContent = showBtn.textContent === 'Show code' ? 'Hide code' : 'Show code'; });
+      copyBtn.addEventListener('click', async ()=> { try{ await navigator.clipboard.writeText(s.code); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy',900);}catch(e){copyBtn.textContent='Err'; setTimeout(()=>copyBtn.textContent='Copy',900);} });
+      controls.appendChild(showBtn); controls.appendChild(copyBtn);
+      row.appendChild(meta); row.appendChild(controls);
+      scriptBody.appendChild(row);
+      projContent.appendChild(codeBlock);
+    });
+    scriptSection.appendChild(scriptHeader); scriptSection.appendChild(scriptBody);
+    projContent.appendChild(scriptSection);
+
+    // toggles
+    uiHeader.querySelector('button').addEventListener('click', ()=> uiBody.classList.toggle('active'));
+    scriptHeader.querySelector('button').addEventListener('click', ()=> scriptBody.classList.toggle('active'));
+
+    showProjectModal();
+  }
+
+  else {
+    projContent.innerHTML = '<h2>Project</h2><p>Not implemented.</p>';
+    showProjectModal();
+  }
+}
+
+/* show/hide project modal */
+function showProjectModal(){
+  projModal.classList.add('active');
+  projModal.setAttribute('aria-hidden','false');
+}
+function closeProjectModal(){
+  projModal.classList.remove('active');
+  projModal.setAttribute('aria-hidden','true');
+  removeDiscordPreviewHandlers();
+}
+
+/* image preview used by roblox list */
+function openImagePreview(imgUrl, title){
+  projContent.innerHTML = '';
+  const h = document.createElement('h2'); h.textContent = title;
+  const img = document.createElement('img'); img.src = imgUrl; img.style.maxWidth='80%'; img.style.borderRadius='10px'; img.style.display='block'; img.style.margin='12px auto';
+  projContent.appendChild(h); projContent.appendChild(img);
+  showProjectModal();
+}
+
+/* DISCORD preview "look at cursor" handlers */
+function attachDiscordPreviewHandlers(previewImg){
+  discordPreviewEl = previewImg;
+  const modalCard = document.querySelector('#project-modal .card');
+
+  // compute rotation based on mouse pos relative to preview center
+  discordMouseMoveHandler = (e) => {
+    const rect = discordPreviewEl.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    // Normalize
+    const rx = (dy / rect.height) * -15; // rotateX
+    const ry = (dx / rect.width) * 15; // rotateY
+    // clamp
+    const clamp = (v, a) => Math.max(-a, Math.min(a, v));
+    discordPreviewEl.style.transform = `perspective(900px) rotateX(${clamp(rx,15)}deg) rotateY(${clamp(ry,15)}deg) scale(1)`;
+  };
+
+  const leaveHandler = () => {
+    discordPreviewEl.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)`;
+  };
+
+  // attach to modal card (so movement when inside modal triggers it)
+  modalCard.addEventListener('mousemove', discordMouseMoveHandler);
+  modalCard.addEventListener('mouseleave', leaveHandler);
+
+  // store references so we can remove later
+  discordPreviewEl._modal = modalCard;
+  discordPreviewEl._mouseHandler = discordMouseMoveHandler;
+  discordPreviewEl._leaveHandler = leaveHandler;
+}
+
+function removeDiscordPreviewHandlers(){
+  if (!discordPreviewEl) return;
+  const modalCard = discordPreviewEl._modal;
+  if (modalCard && discordPreviewEl._mouseHandler) modalCard.removeEventListener('mousemove', discordPreviewEl._mouseHandler);
+  if (modalCard && discordPreviewEl._leaveHandler) modalCard.removeEventListener('mouseleave', discordPreviewEl._leaveHandler);
+  // reset transform
+  discordPreviewEl.style.transform = '';
+  discordPreviewEl = null;
+  discordMouseMoveHandler = null;
+}
+
+/* initial tab show - show coding by default */
+document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
+document.getElementById('coding').style.display = 'block';
+
+/* Accessibility: Escape closes any modal */
+document.addEventListener('keydown', (e)=>{
+  if (e.key === 'Escape') {
+    if (projModal.classList.contains('active')) closeProjectModal();
+    if (drawModal.classList.contains('active')) closeDrawModal();
+  }
+});
+
+const liveIndicator = document.getElementById('live-indicator');
+const streamTitle = document.getElementById('stream-title');
+const streamDesc = document.getElementById('stream-desc');
+
+// ----- CONFIGURE YOUR TWITCH INFO -----
+const TWITCH_CLIENT_ID = "gp762nuuoqcoxypju8c569th9wz7q5";
+const TWITCH_AUTH_TOKEN = "btscuoackdct9dxfp2q813h0w6qfhn"; // Bearer token
+const CHANNEL_NAME = "sealient"; // your Twitch username
+const REFRESH_INTERVAL = 30000; // check every 30s
+// --------------------------------------
+
+
+// Function to check Twitch live status
+async function checkLiveStatus() {
+  try {
+    const response = await fetch(`https://api.twitch.tv/helix/streams?user_login=${CHANNEL_NAME}`, {
+      headers: {
+        'Client-ID': TWITCH_CLIENT_ID,
+        'Authorization': `Bearer ${TWITCH_AUTH_TOKEN}`
+      }
+    });
+    const data = await response.json();
+
+    if(data.data && data.data.length > 0) {
+      // Channel is live
+      liveIndicator.classList.add('live');
+      streamTitle.textContent = 'Live Now!';
+      streamDesc.textContent = data.data[0].title || 'Streaming live on Twitch!';
+    } else {
+      // Offline
+      liveIndicator.classList.remove('live');
+      streamTitle.textContent = 'Currently Offline';
+      streamDesc.textContent = 'I stream when possible. Follow to catch me!';
+    }
+  } catch (e) {
+    // API fetch failed
+    liveIndicator.classList.remove('live');
+    streamTitle.textContent = 'Currently Offline';
+    streamDesc.textContent = 'I stream when possible. Follow to catch me!';
+    console.error('Twitch API error:', e);
+  }
+}
+
+// Initial check
+checkLiveStatus();
+// Recheck periodically
+setInterval(checkLiveStatus, REFRESH_INTERVAL);
+// 3D tilt effect
+document.querySelectorAll('.dashboard-card').forEach(card=>{
+  card.addEventListener('mousemove', e=>{
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = rect.width/2;
+    const cy = rect.height/2;
+    const dx = (x - cx)/cx;
+    const dy = (y - cy)/cy;
+    card.style.transform = `rotateX(${-dy*3}deg) rotateY(${dx*3}deg) scale(1.01)`;
+  });
+  card.addEventListener('mouseleave', ()=>{ card.style.transform='rotateX(0deg) rotateY(0deg) scale(1)'; });
+});
+
+// Expand/collapse panels
+document.querySelectorAll('.dashboard-card').forEach(card=>{
+  const toggleBtn = card.querySelector('.toggle-btn');
+  toggleBtn.addEventListener('click', e=>{
+    e.stopPropagation(); // prevent tilt click interference
+    card.classList.toggle('expanded');
+  });
+});
+
+// ====== TRUE REAL-TIME BIRTHDAY PROGRESS BAR ======
+
+// Your birthday
+const birthDate = new Date(2007, 4, 7); // Month is 0-indexed: May 7, 2007
+const maxAge = 50; // 50-year milestone
+
+const progressBar = document.querySelector('.dashboard-card .progress-bar .progress');
+
+function updateProgressExactly() {
+    const now = new Date();
+
+    // Age in milliseconds
+    const ageMs = now - birthDate;
+
+    // Convert milliseconds → exact years including fractions
+    const ageYears = ageMs / (1000 * 60 * 60 * 24 * 365.2425);
+    // (365.2425 = true average year length including leap years)
+
+    // Progress percentage
+    const progressPercent = Math.min((ageYears / maxAge) * 100, 100);
+
+    // Apply to bar
+    progressBar.style.transition = "width 2s cubic-bezier(.25,.1,.25,1)";
+    progressBar.style.width = progressPercent + "%";
+
+    // If you want to visually verify:
+    console.log("Age:", ageYears.toFixed(8), "years");
+    console.log("Progress:", progressPercent.toFixed(6), "%");
+}
+
+// Run immediately
+updateProgressExactly();
+
+
+(function () {
+    // Your birthday
+    const birthdayMonth = 4; // March → 2
+    const birthdayDay = 7;  // Example: 14th
+
+    const now = new Date();
+
+    if (now.getMonth() === birthdayMonth && now.getDate() === birthdayDay) {
+        const popup = document.getElementById("birthdayPopup");
+        if (popup) {
+            popup.style.display = "block";
+
+            // fade in smoothly
+            requestAnimationFrame(() => {
+                popup.style.opacity = "1";
+            });
+
+            // auto-hide after 8 seconds (optional)
+            setTimeout(() => {
+                popup.style.opacity = "0";
+                setTimeout(() => popup.style.display = "none", 700);
+            }, 8000);
+        }
+    }
+})();
+
+
+</script>
+
 </body>
 </html>
+
