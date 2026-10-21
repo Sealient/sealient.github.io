@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEALLY // MINECRAFT ARCHITECTURE</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              DEFAULT: '#a855f7',
+              neon: '#c084fc',
+              cyan: '#22d3ee',
+              dark: '#581c87'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-black text-white font-sans min-h-screen selection:bg-accent selection:text-white flex flex-col justify-between p-6 md:p-16 lg:p-24 overflow-x-hidden relative page-entering">
+
+  <!-- MOUSE-REACTIVE AMBIENT GLOW -->
+  <div id="mouse-glow"></div>
+
+  <!-- CINEMATIC SHOCKWAVE FLASH -->
+  <div id="shockwave-flash" class="fixed inset-0 pointer-events-none z-50"></div>
+
+  <!-- UNIFIED CENTER-SPLIT CURTAINS & LASER ENGINE -->
+  <div id="split-container" class="fixed inset-0 pointer-events-none z-40 flex flex-col overflow-hidden">
+    <div class="curtain-half curtain-top-half"></div>
+    <div id="center-laser" class="middle-laser-line"></div>
+    <div class="curtain-half curtain-bottom-half"></div>
+  </div>
+
+  <!-- TOP EDITORIAL HEADER -->
+  <header class="w-full max-w-[1600px] mx-auto flex justify-between items-center pb-8 border-b border-neutral-900 text-xs font-mono uppercase tracking-widest relative z-20">
+    <div class="flex items-center gap-3">
+      <span class="text-accent font-bold animate-pulse">●</span>
+      <span class="text-neutral-400">SEALLY // MINECRAFT BUILDS</span>
+    </div>
+
+    <!-- AUDIO TOGGLE -->
+    <button id="sfx-toggle" class="text-neutral-500 hover:text-accent transition flex items-center gap-2 cursor-pointer bg-neutral-950 px-4 py-2 border border-neutral-900 text-xs">
+      <i class="fa-solid fa-volume-xmark" id="sfx-icon"></i>
+      <span id="sfx-text">SFX: OFF</span>
+    </button>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="w-full max-w-[1600px] mx-auto my-auto py-12 lg:py-16 relative z-20 space-y-16">
+
+    <!-- PAGE HEADER -->
+    <div class="hero-reveal-1 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-neutral-900">
+      <div class="space-y-4 max-w-2xl">
+        <div class="inline-flex items-center gap-3 border border-neutral-800 bg-neutral-950/60 text-neutral-400 font-mono text-xs px-4 py-2 uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-accent"></span>
+          <span>Minecraft Builds</span>
+        </div>
+        <h1 class="text-5xl sm:text-7xl font-black tracking-tighter uppercase">
+          MINECRAFT <span class="text-accent glow-heading">BUILDS</span>
+        </h1>
+        <p class="text-neutral-400 text-sm sm:text-base font-mono">
+          Custom architectural builds and server event spaces. Download world saves or schematics below.
+        </p>
+      </div>
+
+      <!-- SERVER ROLE BADGE -->
+      <div class="bg-neutral-950/80 border border-neutral-900 p-6 backdrop-blur-md space-y-2 font-mono text-xs min-w-[260px]">
+        <div class="text-accent uppercase tracking-widest">// ROLE: Builder/Developer</div>
+        <div class="text-neutral-400">STATUS: CODING & BUILDING</div>
+      </div>
+    </div>
+
+    <!-- CINEMATIC BUILDS POSTER STACK -->
+    <div class="hero-reveal-2 space-y-20" id="builds-stack">
+      <!-- Dynamically injected via minecraft-data.js -->
+    </div>
+
+  </main>
+
+  <!-- BOTTOM EDITORIAL FOOTER -->
+  <footer class="w-full max-w-[1600px] mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest relative z-20 text-neutral-500">
+    <div>© 2026 SEALLY. ALL RIGHTS RESERVED.</div>
+   <div class="flex items-center gap-8 font-bold flex-wrap justify-center">
+      <a href="index.html" class="portal-link editorial-link hover:text-white transition uppercase">Index</a>
+      <a href="projects.html" class="portal-link editorial-link hover:text-white transition uppercase">Projects</a>
+      <a href="roblox.html" class="portal-link editorial-link hover:text-white transition uppercase">Roblox</a>
+      <a href="mc.html" class="portal-link editorial-link hover:text-white transition uppercase">Minecraft</a>
+      <a href="drawings.html" class="portal-link editorial-link hover:text-white transition uppercase">Drawings</a>
+      <a href="about.html" class="portal-link editorial-link hover:text-white transition uppercase">About</a>
+      <a href="connect.html" class="portal-link editorial-link hover:text-white transition uppercase">Connect</a>
+    </div>
+  </footer>
+
+  <!-- LOAD DATA FIRST, THEN LOGIC -->
+  <script src="minecraft-data.js"></script>
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const stack = document.getElementById('builds-stack');
+      if (!stack || typeof minecraftBuildsData === 'undefined') return;
+
+      minecraftBuildsData.forEach((build) => {
+        // Build download buttons dynamically based on what links are provided
+        let downloadButtonsHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">';
+        
+        if (build.worldLink && build.worldLink.trim() !== "") {
+          downloadButtonsHTML += `
+            <a href="${build.worldLink}" target="_blank" class="py-4 bg-white text-black font-bold font-mono text-xs uppercase tracking-widest text-center block hover:bg-accent hover:text-white transition duration-300 flex items-center justify-center gap-2 border border-white">
+              <i class="fa-solid fa-globe"></i>
+              <span>WORLD DOWNLOAD</span>
+            </a>
+          `;
+        }
+
+        if (build.schemLink && build.schemLink.trim() !== "") {
+          downloadButtonsHTML += `
+            <a href="${build.schemLink}" target="_blank" class="py-4 bg-neutral-900 text-white font-bold font-mono text-xs uppercase tracking-widest text-center block hover:bg-accent hover:text-white transition duration-300 flex items-center justify-center gap-2 border border-neutral-800">
+              <i class="fa-solid fa-file-code"></i>
+              <span>SCHEMATIC FILE</span>
+            </a>
+          `;
+        }
+
+        downloadButtonsHTML += '</div>';
+
+        const item = document.createElement('div');
+        item.className = "grid grid-cols-1 lg:grid-cols-12 gap-12 items-center bg-neutral-950/40 border border-neutral-900 p-8 lg:p-12 backdrop-blur-md relative overflow-hidden group hover:border-accent transition duration-500";
+        item.innerHTML = `
+          <div class="lg:col-span-7 h-[400px] bg-black border border-neutral-900 overflow-hidden relative flex items-center justify-center">
+            <img src="${build.image}" alt="${build.title}" class="w-full h-full object-cover filter contrast-125 group-hover:scale-105 transition duration-700" />
+            <div class="absolute top-4 left-4 bg-black/80 px-3 py-1 border border-neutral-800 text-[10px] font-mono text-accent">
+              ${build.coordinates}
+            </div>
+          </div>
+          <div class="lg:col-span-5 space-y-6">
+            <div class="space-y-2">
+              <div class="flex justify-between items-center text-xs font-mono text-neutral-500">
+                <span>${build.category}</span>
+                <span class="text-accent">${build.status}</span>
+              </div>
+              <h2 class="text-3xl lg:text-4xl font-black uppercase tracking-tight">${build.title}</h2>
+            </div>
+            <p class="text-neutral-400 text-sm font-mono leading-relaxed border-l border-neutral-800 pl-4">
+              ${build.desc}
+            </p>
+            ${downloadButtonsHTML}
+          </div>
+        `;
+        stack.appendChild(item);
+      });
+    });
+  </script>
+</body>
+</html>
