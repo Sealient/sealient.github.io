@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEALLY // CONNECT & LIVE SPOTIFY</title>
+  <title>SEALLY // SIGNAL MATRIX & SPOTIFY TELEMETRY</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -32,6 +32,19 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    .scanline {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.3)
+      );
+      background-size: 100% 4px;
+    }
+  </style>
 </head>
 <body class="bg-black text-white font-sans min-h-screen selection:bg-accent selection:text-white flex flex-col justify-between p-6 md:p-16 lg:p-24 overflow-x-hidden relative page-entering">
 
@@ -51,7 +64,7 @@
   <!-- TOP EDITORIAL HEADER -->
   <header class="w-full max-w-[1600px] mx-auto flex justify-between items-center pb-8 border-b border-neutral-900 text-xs font-mono uppercase tracking-widest relative z-20">
     <div class="flex items-center gap-3">
-      <span class="text-accent font-bold animate-pulse">●</span>
+      <span class="text-spotify font-bold animate-pulse">●</span>
       <span class="text-neutral-400">SEALLY // SIGNAL_MATRIX</span>
     </div>
 
@@ -63,98 +76,96 @@
   </header>
 
   <!-- MAIN WORKSPACE -->
-  <main class="w-full max-w-[1600px] mx-auto my-auto py-12 lg:py-16 relative z-20 space-y-12">
+  <main class="w-full max-w-[1600px] mx-auto my-auto py-12 lg:py-16 relative z-20 space-y-16">
 
     <!-- PAGE HEADER -->
-    <div class="hero-reveal-1 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-neutral-900">
-      <div class="space-y-4 max-w-2xl">
+    <div class="hero-reveal-1 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 pb-8 border-b border-neutral-900">
+      <div class="space-y-4 max-w-3xl">
         <div class="inline-flex items-center gap-3 border border-neutral-800 bg-neutral-950/60 text-neutral-400 font-mono text-xs px-4 py-2 uppercase tracking-wider">
-          <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
-          <span>COMMUNICATION CHANNELS // OPEN</span>
+          <span class="w-2 h-2 rounded-full bg-spotify animate-ping"></span>
+          <span>LIVE API TELEMETRY // CONNECT MATRIX</span>
         </div>
         <h1 class="text-5xl sm:text-7xl font-black tracking-tighter uppercase">
-          ESTABLISH <span class="text-accent glow-heading">CONNECTION</span>
+          SIGNAL <span class="text-spotify glow-heading">MATRIX</span>
         </h1>
         <p class="text-neutral-400 text-sm sm:text-base font-mono">
-          Initialize contact, check live Spotify telemetry, or copy direct handles below.
+          Establish communication lines, check social channels, and monitor live streaming telemetry synced directly from Spotify and LRCLIB.
         </p>
-      </div>
-
-      <!-- TERMINAL STATUS READOUT -->
-      <div class="bg-neutral-950/80 border border-neutral-900 p-6 backdrop-blur-md space-y-2 font-mono text-xs min-w-[280px]">
-        <div class="text-accent uppercase tracking-widest">// PROTOCOL: SECURE RELAY</div>
-        <div class="flex justify-between text-neutral-400 py-1 border-b border-neutral-900">
-          <span>LATENCY:</span>
-          <span class="text-white">14ms (OPTIMAL)</span>
-        </div>
-        <div class="flex justify-between text-neutral-400 py-1">
-          <span>DISCORD ID:</span>
-          <span class="text-accent select-all">sealrl_</span>
-        </div>
       </div>
     </div>
 
-    <!-- LIVE SPOTIFY API TELEMETRY HUD -->
-    <div class="hero-reveal-2 bg-neutral-950/80 border border-neutral-900 p-6 lg:p-8 backdrop-blur-md relative overflow-hidden space-y-6">
-      <div class="absolute top-0 right-0 bg-spotify text-black font-mono text-[9px] px-3 py-1 font-bold uppercase tracking-widest flex items-center gap-1.5">
-        <i class="fa-brands fa-spotify"></i> LIVE SPOTIFY API
-      </div>
+    <!-- SPOTIFY TELEMETRY HUD SECTION -->
+    <div class="hero-reveal-2 bg-neutral-950/80 border border-neutral-900 p-8 lg:p-12 backdrop-blur-xl relative overflow-hidden">
+      <div class="absolute inset-0 scanline pointer-events-none opacity-20"></div>
 
-      <!-- AUTH REQUIRED STATE (Shown if token is missing) -->
-      <div id="spotify-auth-box" class="py-8 text-center space-y-4">
-        <div class="text-xs font-mono text-neutral-400 uppercase tracking-widest">Connect your Spotify account to display live listening stats & playback timeline.</div>
-        <button onclick="loginWithSpotify()" class="px-6 py-3 bg-spotify text-black font-bold font-mono text-xs uppercase tracking-widest hover:bg-white transition cursor-pointer inline-flex items-center gap-2">
-          <i class="fa-brands fa-spotify text-base"></i> AUTHENTICATE SPOTIFY SESSION
+      <!-- AUTHENTICATION STATE (SHOWN IF NO TOKEN) -->
+      <div id="spotify-auth-box" class="space-y-6 text-center py-8">
+        <div class="text-xs font-mono text-spotify uppercase tracking-widest">// SPOTIFY OAUTH AUTHENTICATION REQUIRED</div>
+        <h2 class="text-3xl font-black uppercase">Connect Your Spotify Session</h2>
+        <p class="text-neutral-400 font-mono text-xs max-w-lg mx-auto">
+          Authenticate your Spotify account using PKCE OAuth to broadcast your currently playing track, progress timeline, and synced live lyrics directly into this portfolio HUD.
+        </p>
+        <button onclick="loginWithSpotify()" class="px-8 py-4 bg-spotify text-black font-black font-mono text-xs uppercase tracking-widest hover:bg-emerald-400 transition cursor-pointer inline-flex items-center gap-3">
+          <i class="fa-brands fa-spotify text-lg"></i>
+          <span>AUTHENTICATE SPOTIFY SESSION</span>
         </button>
       </div>
 
-      <!-- PLAYER HUD (Hidden until authenticated and active) -->
-      <div id="spotify-player-box" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center hidden">
-        <div class="lg:col-span-5 flex items-center gap-5">
-          <div class="relative w-20 h-20 sm:w-24 sm:h-24 bg-black border border-neutral-800 flex-shrink-0 overflow-hidden">
-            <img id="spotify-art" src="" alt="Album Art" class="w-full h-full object-cover filter contrast-110" />
-            <div class="absolute inset-0 bg-spotify/10 mix-blend-overlay"></div>
+      <!-- LIVE PLAYER STATE (SHOWN AFTER AUTHENTICATION) -->
+      <div id="spotify-player-box" class="hidden space-y-8">
+        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 font-mono text-xs">
+          <div class="flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-spotify animate-ping"></span>
+            <span id="spotify-playback-state" class="text-spotify font-bold uppercase">CONNECTING TO STREAM...</span>
           </div>
-          <div class="space-y-1 overflow-hidden">
-            <div class="text-[10px] font-mono text-spotify uppercase tracking-widest flex items-center gap-2">
-              <span id="spotify-pulse-dot" class="w-1.5 h-1.5 rounded-full bg-spotify animate-pulse"></span>
-              <span id="spotify-status-text">LIVE SESSION ACTIVE</span>
+          <a id="spotify-listen-link" href="#" target="_blank" class="text-neutral-400 hover:text-white transition flex items-center gap-2">
+            <span>OPEN IN SPOTIFY</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+
+        <!-- TRACK INFO & ALBUM ART -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-3">
+            <div class="w-48 h-48 bg-neutral-900 border border-neutral-800 mx-auto overflow-hidden relative group">
+              <img id="spotify-art" src="" alt="Album Art" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
             </div>
-            <h3 id="spotify-title" class="text-xl sm:text-2xl font-bold uppercase tracking-tight truncate"></h3>
-            <p id="spotify-artist" class="text-xs font-mono text-neutral-400 uppercase tracking-wide"></p>
+          </div>
+          <div class="lg:col-span-9 space-y-4">
+            <div>
+              <div id="spotify-artist" class="text-xs font-mono text-spotify uppercase tracking-widest mb-1">Loading Artist...</div>
+              <h3 id="spotify-title" class="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">Loading Track...</h3>
+            </div>
+
+            <!-- PROGRESS TIMELINE -->
+            <div class="space-y-2 font-mono text-xs">
+              <div class="flex justify-between text-neutral-500">
+                <span id="current-time-label">0:00</span>
+                <span id="total-time-label">0:00</span>
+              </div>
+              <div class="w-full h-1.5 bg-neutral-900 overflow-hidden rounded-full">
+                <div id="progress-bar" class="h-full bg-spotify w-0 transition-all duration-300"></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="lg:col-span-7 space-y-4 bg-black/60 p-6 border border-neutral-900">
-          <div class="h-10 flex items-center justify-center text-center overflow-hidden">
-            <p id="spotify-playback-state" class="text-xs sm:text-sm font-mono text-accent uppercase tracking-wider">
-              Syncing playback stream...
-            </p>
+        <!-- LIVE LRCLIB SYNCED LYRICS TERMINAL -->
+        <div class="p-6 bg-black/80 border border-neutral-900 text-center space-y-2 font-mono relative">
+          <div class="text-[10px] text-spotify uppercase tracking-widest">// LIVE LRCLIB SYNCED LYRICS STREAM</div>
+          <div id="live-lyric-container" class="text-lg sm:text-2xl font-black tracking-tight text-white transition-all duration-300 py-2">
+            Awaiting audio stream...
           </div>
-
-          <div class="space-y-1.5 font-mono text-[10px] text-neutral-500">
-            <div class="flex justify-between">
-              <span id="current-time-label">0:00</span>
-              <span id="total-time-label">0:00</span>
-            </div>
-            <div class="w-full h-1.5 bg-neutral-900 overflow-hidden relative">
-              <div id="progress-bar" class="h-full bg-spotify w-0 transition-all duration-300"></div>
-            </div>
-          </div>
-
-          <div class="pt-2">
-            <a id="spotify-listen-link" href="#" target="_blank" class="w-full py-3 bg-neutral-900 border border-neutral-800 text-spotify font-bold font-mono text-xs uppercase tracking-widest text-center block hover:bg-spotify hover:text-black transition duration-300 flex items-center justify-center gap-2">
-              <i class="fa-brands fa-spotify"></i>
-              <span>OPEN TRACK IN SPOTIFY →</span>
-            </a>
+          <div id="next-lyric-container" class="text-xs text-neutral-500 uppercase">
+            <!-- Next lyric preview -->
           </div>
         </div>
       </div>
     </div>
 
-    <!-- INTERACTIVE SIGNAL MATRIX GRID -->
-    <div class="hero-reveal-2 grid grid-cols-1 md:grid-cols-2 gap-6" id="signal-matrix">
-      <!-- Injected dynamically via connect-data.js -->
+    <!-- SOCIAL SIGNAL MATRIX GRID -->
+    <div id="signal-matrix" class="hero-reveal-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Injected via connect-data.js -->
     </div>
 
   </main>
@@ -165,14 +176,13 @@
     <div class="flex items-center gap-8 font-bold">
       <a href="index.html" class="portal-link editorial-link text-accent uppercase">Index</a>
       <a href="projects.html" class="portal-link editorial-link hover:text-white transition uppercase">Projects</a>
-      <a href="roblox.html" class="portal-link editorial-link hover:text-white transition uppercase">Roblox</a>
       <a href="minecraft.html" class="portal-link editorial-link hover:text-white transition uppercase">Minecraft</a>
-      <a href="drawings.html" class="portal-link editorial-link hover:text-white transition uppercase">Drawings</a>
+      <a href="about.html" class="portal-link editorial-link hover:text-white transition uppercase">About</a>
       <a href="connect.html" class="portal-link editorial-link text-white uppercase">Connect</a>
     </div>
   </footer>
 
-<!-- LOAD DATA FIRST, THEN LOGIC -->
+  <!-- LOAD DATA FIRST, THEN LOGIC -->
   <script src="connect-data.js"></script>
   <script src="script.js"></script>
   <script>
@@ -426,7 +436,7 @@
       if (!lyricEl) return;
 
       if (!currentSyncedLyrics.length) {
-        lyricEl.textContent = "Synched lyrics unavailable";
+        lyricEl.textContent = "Synced lyrics unavailable";
         if (nextLyricEl) nextLyricEl.textContent = "";
         return;
       }
@@ -465,5 +475,5 @@
       }, 2000);
     }
   </script>
-  </body>
+</body>
 </html>
