@@ -172,13 +172,16 @@
     </div>
   </footer>
 
-  <!-- LOAD DATA FIRST, THEN LOGIC -->
+<!-- LOAD DATA FIRST, THEN LOGIC -->
   <script src="connect-data.js"></script>
   <script src="script.js"></script>
   <script>
     const clientId = 'ddbd4ee6171a4a91a42bd8f85a821d00';
     const redirectUri = window.location.origin + window.location.pathname; // Dynamically matches current page (supports local/GitHub pages callback)
     const scopes = ['user-read-currently-playing', 'user-read-playback-state'];
+
+    let currentSyncedLyrics = [];
+    let lastFetchedTrackId = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       // 1. Render Social Signal Matrix
@@ -308,7 +311,7 @@
       window.location.href = authUrl.toString();
     }
 
-// Fetch Currently Playing Track from Spotify API
+    // Fetch Currently Playing Track from Spotify API & Sync Lyrics from LRCLIB
     async function fetchCurrentlyPlaying(token) {
       try {
         const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
@@ -320,6 +323,8 @@
           document.getElementById('spotify-artist').textContent = "Open Spotify to broadcast telemetry";
           document.getElementById('spotify-playback-state').textContent = "PAUSED / IDLE";
           document.getElementById('progress-bar').style.width = '0%';
+          const lyricEl = document.getElementById('live-lyric-container');
+          if (lyricEl) lyricEl.textContent = "Awaiting audio stream...";
           return;
         }
 
@@ -335,6 +340,15 @@
         const progressMs = data.progress_ms;
         const durationMs = track.duration_ms;
         const isPlaying = data.is_playing;
+
+        // Check if track changed to fetch new lyrics
+        if (track.id !== lastFetchedTrackId) {
+          lastFetchedTrackId = track.id;
+          await fetchLyrics(track.name, track.artists[0].name, durationMs);
+        }
+
+        // Update Lyric display based on current progress
+        updateLyricDisplay(progressMs);
 
         function formatTime(ms) {
           const totalSeconds = Math.floor(ms / 1000);
@@ -352,6 +366,90 @@
         console.error('Error fetching Spotify playback:', err);
       }
     }
+
+    // LRCLIB Integration for Synchronized Web Lyrics
+    async function fetchLyrics(title, artist, durationMs) {
+      try {
+        currentSyncedLyrics = [];
+        const response = await fetch(`https://lrclib.net/api/get?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}&duration=${Math.floor(durationMs / 1000)}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.syncedLyrics) {
+            currentSyncedLyrics = parseLrc(data.syncedLyrics);
+            return;
+          }
+        }
+
+        // Fallback search if exact match fails
+        const searchRes = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`);
+        if (searchRes.ok) {
+          const candidates = await searchRes.json();
+          if (Array.isArray(candidates) && candidates.length > 0) {
+            for (const candidate of candidates) {
+              if (candidate.syncedLyrics) {
+                currentSyncedLyrics = parseLrc(candidate.syncedLyrics);
+                return;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch synchronized lyrics:', err);
+      }
+    }
+
+    function parseLrc(lrcText) {
+      const parsed = [];
+      const lines = lrcText.split('\n');
+      const timeRegex = /\[(\d+):(\d{1,2}(?:\.\d{1,3})?)\]/;
+
+      for (const line of lines) {
+        const match = timeRegex.exec(line);
+        if (match) {
+          const minutes = parseInt(match[1], 10);
+          const seconds = parseFloat(match[2]);
+          const timestampMs = Math.round((minutes * 60 + seconds) * 1000);
+          const text = line.replace(timeRegex, '').trim();
+          if (text) {
+            parsed.push({ time: timestampMs, text: text });
+          }
+        }
+      }
+      return parsed.sort((a, b) => a.time - b.time);
+    }
+
+    function updateLyricDisplay(progressMs) {
+      const lyricEl = document.getElementById('live-lyric-container');
+      const nextLyricEl = document.getElementById('next-lyric-container');
+      
+      if (!lyricEl) return;
+
+      if (!currentSyncedLyrics.length) {
+        lyricEl.textContent = "Synched lyrics unavailable";
+        if (nextLyricEl) nextLyricEl.textContent = "";
+        return;
+      }
+
+      let activeIndex = -1;
+      for (let i = 0; i < currentSyncedLyrics.length; i++) {
+        if (progressMs >= currentSyncedLyrics[i].time) {
+          activeIndex = i;
+        } else {
+          break;
+        }
+      }
+
+      if (activeIndex >= 0) {
+        lyricEl.textContent = currentSyncedLyrics[activeIndex].text;
+        if (nextLyricEl) {
+          nextLyricEl.textContent = currentSyncedLyrics[activeIndex + 1] ? currentSyncedLyrics[activeIndex + 1].text : "";
+        }
+      } else {
+        lyricEl.textContent = currentSyncedLyrics[0].text;
+        if (nextLyricEl) nextLyricEl.textContent = currentSyncedLyrics[1] ? currentSyncedLyrics[1].text : "";
+      }
+    }
     
     function copyToClipboard(text, btnElement) {
       navigator.clipboard.writeText(text);
@@ -367,5 +465,5 @@
       }, 2000);
     }
   </script>
-</body>
+  </body>
 </html>
