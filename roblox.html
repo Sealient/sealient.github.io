@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEALLY // ROBLOX LUA TERMINAL</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              DEFAULT: '#a855f7',
+              neon: '#c084fc',
+              cyan: '#22d3ee',
+              dark: '#581c87'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-black text-white font-sans min-h-screen selection:bg-accent selection:text-white flex flex-col justify-between p-6 md:p-16 lg:p-24 overflow-x-hidden relative page-entering">
+
+  <!-- MOUSE-REACTIVE AMBIENT GLOW -->
+  <div id="mouse-glow"></div>
+
+  <!-- CINEMATIC SHOCKWAVE FLASH -->
+  <div id="shockwave-flash" class="fixed inset-0 pointer-events-none z-50"></div>
+
+  <!-- UNIFIED CENTER-SPLIT CURTAINS & LASER ENGINE -->
+  <div id="split-container" class="fixed inset-0 pointer-events-none z-40 flex flex-col overflow-hidden">
+    <div class="curtain-half curtain-top-half"></div>
+    <div id="center-laser" class="middle-laser-line"></div>
+    <div class="curtain-half curtain-bottom-half"></div>
+  </div>
+
+  <!-- TOP EDITORIAL HEADER -->
+  <header class="w-full max-w-[1600px] mx-auto flex justify-between items-center pb-8 border-b border-neutral-900 text-xs font-mono uppercase tracking-widest relative z-20">
+    <div class="flex items-center gap-3">
+      <span class="text-accent font-bold animate-pulse">●</span>
+      <span class="text-neutral-400">SEALLY // LUA_TERMINAL</span>
+    </div>
+
+    <!-- AUDIO TOGGLE -->
+    <button id="sfx-toggle" class="text-neutral-500 hover:text-accent transition flex items-center gap-2 cursor-pointer bg-neutral-950 px-4 py-2 border border-neutral-900 text-xs">
+      <i class="fa-solid fa-volume-xmark" id="sfx-icon"></i>
+      <span id="sfx-text">SFX: OFF</span>
+    </button>
+  </header>
+
+  <!-- MAIN TERMINAL WORKSPACE -->
+  <main class="w-full max-w-[1600px] mx-auto my-auto py-12 lg:py-16 relative z-20 space-y-8">
+
+    <!-- PAGE TITLE -->
+    <div class="hero-reveal-1 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-neutral-900">
+      <div>
+        <div class="text-xs font-mono text-accent uppercase tracking-widest mb-2">// LUA ENVIRONMENT & SCRIPTING</div>
+        <h1 class="text-4xl sm:text-6xl font-black tracking-tighter uppercase">
+          ROBLOX <span class="text-accent glow-heading">SYSTEMS</span>
+        </h1>
+      </div>
+      <div class="text-xs font-mono text-neutral-500">
+        RUNTIME: <span class="text-white">LUAU ENGINE v5.1</span>
+      </div>
+    </div>
+
+    <!-- CODE TERMINAL INTERFACE GRID -->
+    <div class="hero-reveal-2 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- LEFT PANEL: SCRIPT SELECTOR LIST -->
+      <div class="lg:col-span-4 space-y-3" id="script-selector-list">
+        <!-- Injected via roblox-data.js -->
+      </div>
+
+      <!-- RIGHT PANEL: LIVE CODE INSPECTOR -->
+      <div class="lg:col-span-8 bg-neutral-950/80 border border-neutral-900 backdrop-blur-md flex flex-col overflow-hidden">
+        
+        <!-- Terminal Window Bar -->
+        <div class="bg-neutral-900/80 px-6 py-3 border-b border-neutral-800 flex justify-between items-center text-xs font-mono">
+          <div class="flex items-center gap-2 text-neutral-400">
+            <span class="text-accent">●</span>
+            <span id="terminal-filename">AeraUI.lua</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <!-- Documentation Link Button -->
+            <a id="terminal-docs-btn" href="#" target="_blank" class="text-accent hover:text-white transition flex items-center gap-2 bg-black px-3 py-1 border border-accent/30">
+              <i class="fa-solid fa-book-open"></i>
+              <span>DOCS</span>
+            </a>
+            <!-- Copy Button -->
+            <button onclick="copyCode()" class="text-neutral-400 hover:text-accent transition cursor-pointer flex items-center gap-2 bg-black px-3 py-1 border border-neutral-800">
+              <i class="fa-regular fa-copy"></i>
+              <span id="copy-btn-text">COPY SOURCE</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Description & Details -->
+        <div class="p-6 md:p-8 space-y-4 border-b border-neutral-900 bg-black/40">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <h2 id="terminal-title" class="text-2xl font-bold uppercase tracking-wide"></h2>
+            <span id="terminal-version" class="text-xs font-mono text-accent bg-accent/10 px-3 py-1 border border-accent/20"></span>
+          </div>
+          <p id="terminal-desc" class="text-neutral-400 text-sm font-mono leading-relaxed"></p>
+          <div class="flex gap-6 text-xs font-mono text-neutral-500 pt-2">
+            <div>ARCHITECTURE: <span id="terminal-arch" class="text-white"></span></div>
+          </div>
+        </div>
+
+        <!-- Raw Luau Code Viewport (Loaded via Fetch) -->
+        <div class="p-6 md:p-8 bg-black overflow-x-auto max-h-[500px]">
+          <pre><code id="terminal-code" class="text-xs font-mono text-neutral-300 leading-relaxed">Fetching script source...</code></pre>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- BOTTOM EDITORIAL FOOTER -->
+  <footer class="w-full max-w-[1600px] mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest relative z-20 text-neutral-500">
+    <div>© 2026 SEALLY. ALL RIGHTS RESERVED.</div>
+    <div class="flex items-center gap-8 font-bold">
+      <a href="index.html" class="portal-link editorial-link text-accent uppercase">Index</a>
+      <a href="projects.html" class="portal-link editorial-link hover:text-white transition uppercase">Projects</a>
+      <a href="roblox.html" class="portal-link editorial-link text-white uppercase">Roblox</a>
+      <a href="about.html" class="portal-link editorial-link hover:text-white transition uppercase">About</a>
+      <a href="connect.html" class="portal-link editorial-link hover:text-white transition uppercase">Connect</a>
+    </div>
+  </footer>
+
+  <!-- LOAD DATA FIRST, THEN LOGIC -->
+  <script src="roblox-data.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // Render Terminal Selector List & Default Active Script
+    document.addEventListener('DOMContentLoaded', () => {
+      const listContainer = document.getElementById('script-selector-list');
+      if (!listContainer || typeof robloxScriptsData === 'undefined') return;
+
+      robloxScriptsData.forEach((script, index) => {
+        const item = document.createElement('div');
+        item.className = `script-tab p-6 bg-neutral-950/40 border border-neutral-900 hover:border-accent transition cursor-pointer space-y-2 backdrop-blur-md ${index === 0 ? 'border-accent bg-neutral-900/40 active-tab' : ''}`;
+        item.setAttribute('onclick', `loadScript('${script.id}', this)`);
+        item.innerHTML = `
+          <div class="flex justify-between items-center text-[10px] font-mono text-neutral-500">
+            <span>${script.category}</span>
+            <span class="text-accent">${script.status}</span>
+          </div>
+          <h3 class="text-lg font-bold uppercase tracking-wide text-white">${script.title}</h3>
+        `;
+        listContainer.appendChild(item);
+      });
+
+      // Load first script by default
+      if (robloxScriptsData.length > 0) {
+        loadScript(robloxScriptsData[0].id, listContainer.firstElementChild);
+      }
+    });
+
+    // Load Script Info & Fetch External .lua File
+    async function loadScript(id, element) {
+      const script = robloxScriptsData.find(s => s.id === id);
+      if (!script) return;
+
+      // Highlight active tab
+      document.querySelectorAll('.script-tab').forEach(tab => {
+        tab.classList.remove('border-accent', 'bg-neutral-900/40', 'active-tab');
+        tab.classList.add('border-neutral-900', 'bg-neutral-950/40');
+      });
+      if (element) {
+        element.classList.remove('border-neutral-900', 'bg-neutral-950/40');
+        element.classList.add('border-accent', 'bg-neutral-900/40', 'active-tab');
+      }
+
+      // Update Terminal Info
+      document.getElementById('terminal-filename').textContent = script.scriptFile.split('/').pop();
+      document.getElementById('terminal-title').textContent = script.title;
+      document.getElementById('terminal-version').textContent = script.version;
+      document.getElementById('terminal-desc').textContent = script.desc;
+      document.getElementById('terminal-arch').textContent = script.architecture;
+      document.getElementById('terminal-docs-btn').href = script.docsLink;
+
+      const codeContainer = document.getElementById('terminal-code');
+      codeContainer.textContent = "Fetching script source from GitHub...";
+
+      // Fetch the raw GitHub file
+      try {
+        const response = await fetch(script.scriptFile);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const codeContent = await response.text();
+        codeContainer.textContent = codeContent;
+      } catch (error) {
+        codeContainer.textContent = `-- Error: Could not fetch raw script from GitHub.\n-- Ensure the repository is public and the raw URL is correct.`;
+      }
+    }
+
+    // Copy Code Functionality
+    function copyCode() {
+      const codeText = document.getElementById('terminal-code').textContent;
+      navigator.clipboard.writeText(codeText);
+      
+      const btnText = document.getElementById('copy-btn-text');
+      btnText.textContent = "COPIED TO CLIPBOARD";
+      setTimeout(() => {
+        btnText.textContent = "COPY SOURCE";
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

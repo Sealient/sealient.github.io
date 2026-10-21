@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEALLY // DRAWINGS & COMMISSIONS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              DEFAULT: '#a855f7',
+              neon: '#c084fc',
+              cyan: '#22d3ee',
+              dark: '#581c87'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-black text-white font-sans min-h-screen selection:bg-accent selection:text-white flex flex-col justify-between p-6 md:p-16 lg:p-24 overflow-x-hidden relative page-entering">
+
+  <!-- MOUSE-REACTIVE AMBIENT GLOW -->
+  <div id="mouse-glow"></div>
+
+  <!-- CINEMATIC SHOCKWAVE FLASH -->
+  <div id="shockwave-flash" class="fixed inset-0 pointer-events-none z-50"></div>
+
+  <!-- UNIFIED CENTER-SPLIT CURTAINS & LASER ENGINE -->
+  <div id="split-container" class="fixed inset-0 pointer-events-none z-40 flex flex-col overflow-hidden">
+    <div class="curtain-half curtain-top-half"></div>
+    <div id="center-laser" class="middle-laser-line"></div>
+    <div class="curtain-half curtain-bottom-half"></div>
+  </div>
+
+  <!-- FULLSCREEN LIGHTBOX MODAL -->
+  <div id="lightbox-modal" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col justify-center items-center p-6 md:p-12 transition-all duration-300 opacity-0">
+    <button onclick="closeLightbox()" class="absolute top-8 right-8 text-xs font-mono text-neutral-400 hover:text-accent bg-neutral-900 border border-neutral-800 px-4 py-2 cursor-pointer z-50">
+      [ ✕ CLOSE INSPECTION ]
+    </button>
+    <div class="max-w-5xl max-h-[75vh] relative flex items-center justify-center">
+      <img id="lightbox-img" src="" alt="Full Artwork Preview" class="max-w-full max-h-[75vh] object-contain filter contrast-110 border border-neutral-800 shadow-2xl" />
+    </div>
+    <div class="mt-6 text-center space-y-2 font-mono">
+      <h3 id="lightbox-title" class="text-xl font-bold uppercase tracking-wider text-white"></h3>
+      <p id="lightbox-desc" class="text-xs text-neutral-400 max-w-xl"></p>
+    </div>
+  </div>
+
+  <!-- TOP EDITORIAL HEADER -->
+  <header class="w-full max-w-[1600px] mx-auto flex justify-between items-center pb-8 border-b border-neutral-900 text-xs font-mono uppercase tracking-widest relative z-20">
+    <div class="flex items-center gap-3">
+      <span class="text-accent font-bold animate-pulse">●</span>
+      <span class="text-neutral-400">SEALLY // TRADITIONAL ART</span>
+    </div>
+
+    <!-- AUDIO TOGGLE -->
+    <button id="sfx-toggle" class="text-neutral-500 hover:text-accent transition flex items-center gap-2 cursor-pointer bg-neutral-950 px-4 py-2 border border-neutral-900 text-xs">
+      <i class="fa-solid fa-volume-xmark" id="sfx-icon"></i>
+      <span id="sfx-text">SFX: OFF</span>
+    </button>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="w-full max-w-[1600px] mx-auto my-auto py-12 lg:py-16 relative z-20 space-y-16">
+
+    <!-- HEADER & COMMISSION DESK BANNER -->
+    <div class="hero-reveal-1 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pb-8 border-b border-neutral-900">
+      <div class="space-y-4 max-w-2xl">
+        <div class="inline-flex items-center gap-3 border border-neutral-800 bg-neutral-950/60 text-neutral-400 font-mono text-xs px-4 py-2 uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-accent"></span>
+          <span>GRAPHITE & SUBTRACTIVE ERASER STUDIES</span>
+        </div>
+        <h1 class="text-5xl sm:text-7xl font-black tracking-tighter uppercase">
+          SKETCH <span class="text-accent glow-heading">GALLERY</span>
+        </h1>
+        <p class="text-neutral-400 text-sm sm:text-base font-mono">
+          Click any sketch to initialize full-resolution inspection. Pure pencil shading and contrast work.
+        </p>
+      </div>
+
+      <!-- COMMISSION STATUS BOX -->
+      <div class="bg-neutral-950/80 border border-accent/40 p-6 backdrop-blur-md space-y-3 min-w-[300px] relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-accent text-black font-mono text-[9px] px-3 py-1 font-bold uppercase tracking-widest">
+          COMMISSIONS OPEN
+        </div>
+        <div class="text-xs font-mono text-accent uppercase tracking-widest">// DIRECT INQUIRIES</div>
+        <p class="text-neutral-400 text-xs font-mono leading-relaxed">
+          Want a custom piece? Send reference sheets and details directly via Discord.
+        </p>
+        <div class="pt-1">
+          <div class="w-full py-3 bg-neutral-900 border border-neutral-800 text-white font-bold font-mono text-xs uppercase tracking-widest text-center">
+            DISCORD: <span class="text-accent select-all">sealrl_</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL-BLEED ARTWORK SHOWCASE CONTAINER -->
+    <div id="gallery-grid" class="hero-reveal-2 grid grid-cols-1 md:grid-cols-2 gap-12">
+      <!-- Injected dynamically via drawings-data.js -->
+    </div>
+
+  </main>
+
+  <!-- BOTTOM EDITORIAL FOOTER -->
+  <footer class="w-full max-w-[1600px] mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest relative z-20 text-neutral-500">
+    <div>© 2026 SEALLY. ALL RIGHTS RESERVED.</div>
+    <div class="flex items-center gap-8 font-bold">
+      <a href="index.html" class="portal-link editorial-link text-accent uppercase">Index</a>
+      <a href="projects.html" class="portal-link editorial-link hover:text-white transition uppercase">Projects</a>
+      <a href="roblox.html" class="portal-link editorial-link hover:text-white transition uppercase">Roblox</a>
+      <a href="drawings.html" class="portal-link editorial-link text-white uppercase">Drawings</a>
+      <a href="about.html" class="portal-link editorial-link hover:text-white transition uppercase">About</a>
+      <a href="connect.html" class="portal-link editorial-link hover:text-white transition uppercase">Connect</a>
+    </div>
+  </footer>
+
+  <!-- LOAD DATA FIRST, THEN LOGIC -->
+  <script src="drawings-data.js"></script>
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('gallery-grid');
+      if (!grid || typeof drawingsData === 'undefined') return;
+
+      drawingsData.forEach((art, index) => {
+        const item = document.createElement('div');
+        item.className = "group space-y-4 cursor-pointer";
+        item.setAttribute('onclick', `openLightbox('${art.image}', '${art.title.replace(/'/g, "\\'")}', '${art.desc.replace(/'/g, "\\'")}')`);
+        item.innerHTML = `
+          <div class="w-full h-[500px] bg-neutral-950 border border-neutral-900 group-hover:border-accent transition duration-500 overflow-hidden relative flex items-center justify-center p-4">
+            <img src="${art.image}" alt="${art.title}" class="w-full h-full object-contain filter contrast-125 group-hover:scale-105 transition duration-700" />
+            <div class="absolute top-4 left-4 bg-black/80 px-3 py-1 border border-neutral-800 text-[10px] font-mono text-accent">
+              STUDY // 0${index + 1}
+            </div>
+            <div class="absolute bottom-4 right-4 bg-accent text-black font-mono text-[10px] px-3 py-1 font-bold opacity-0 group-hover:opacity-100 transition duration-300">
+              [ INSPECT FULL RESOLUTION ]
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between items-center text-xs font-mono text-neutral-500">
+              <span>${art.medium}</span>
+              <span class="text-accent">CLICK TO ZOOM</span>
+            </div>
+            <h3 class="text-xl font-bold uppercase tracking-wide group-hover:text-accent transition">${art.title}</h3>
+          </div>
+        `;
+        grid.appendChild(item);
+      });
+    });
+
+    function openLightbox(imgSrc, title, desc) {
+      const modal = document.getElementById('lightbox-modal');
+      document.getElementById('lightbox-img').src = imgSrc;
+      document.getElementById('lightbox-title').textContent = title;
+      document.getElementById('lightbox-desc').textContent = desc;
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+      }, 10);
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      modal.classList.add('opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+  </script>
+</body>
+</html>

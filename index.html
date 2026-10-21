@@ -1,977 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<link rel="icon" type="image/png" href="favicon.png" />
-<title>Seal's Cove</title>
-<style>
-  :root{
-    --panel-bg: rgba(0,0,0,0.35);
-    --glass-border: rgba(255,255,255,0.15);
-    --muted: rgba(255,255,255,0.85);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:#fff;background:url('https://i.imgur.com/PPoNXeL.jpeg') center/cover fixed no-repeat;-webkit-font-smoothing:antialiased}
-  .main-wrapper{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(1100px,92vw);display:flex;gap:28px}
-
-/* Sidebar */
-  .sidebar{width:220px;padding:20px;border-radius:16px;background:rgba(255,255,255,0.06);backdrop-filter:blur(12px) saturate(140%);border:1px solid rgba(255,255,255,0.12);box-shadow:0 10px 30px rgba(0,0,0,0.45)}
-  .sidebar h2{margin:0 0 12px;font-size:18px;letter-spacing:1px;text-transform:uppercase;opacity:0.95}
-  .tab-btn{display:block;width:100%;padding:10px;border-radius:10px;border:0;background:rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;margin-bottom:10px;text-align:left}
-  .tab-btn.active{background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));color:#fff}
-
-/* Panel */
-  .panel{flex:1;min-height:520px;padding:24px;border-radius:18px;background:var(--panel-bg);backdrop-filter: blur(10px);border:1px solid var(--glass-border);box-shadow:0 20px 50px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
-  .panel h1{margin:0 0 10px;font-size:20px}
-  .panel p{margin:0 0 12px;color:var(--muted)}
-
-/* ===== Drawing carousel ===== */
-  .carousel-wrapper { width:100%; max-width:720px; display:flex; flex-direction:column; align-items:center; gap:12px; }
-  .carousel-container { position:relative; width:100%; max-width:700px; height:320px; perspective:1200px; display:flex; justify-content:center; align-items:center; }
-  .carousel { width:100%; height:100%; transform-style:preserve-3d; transition: transform .5s ease; position:relative; }
-  .carousel-card { position:absolute; top:50%; left:50%; width:180px; height:260px; border-radius:16px; background-size:cover; background-position:center; box-shadow:0 15px 50px rgba(0,0,0,0.45); transform-style:preserve-3d; transition: transform .45s ease, box-shadow .45s ease; cursor:pointer }
-  .carousel-card:hover { transform: translate(-50%,-50%) translateZ(50px) scale(1.05); box-shadow:0 25px 80px rgba(0,0,0,0.7) }
-
-  .carousel-caption { position:absolute; bottom:-26px; left:50%; transform:translateX(-50%); background: rgba(0,0,0,0.6); padding:6px 10px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .25s }
-  .carousel-card:hover .carousel-caption { opacity:1 }
-
-  .carousel-btn { position:absolute; top:50%; transform:translateY(-50%); background: rgba(255,255,255,0.08); border:none; color:#fff; font-size:26px; width:38px; height:38px; display:flex; justify-content:center; align-items:center; cursor:pointer; border-radius:50%; user-select:none; z-index:5; transition:background .2s }
-  .carousel-btn:hover { background: rgba(255,255,255,0.18) }
-  .carousel-btn.left { left:6px }
-  .carousel-btn.right { right:6px }
-
-  #carousel-progress { font-size:13px; color:var(--muted) }
-
-/* Modal for drawing image */
-  #draw-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:1200; background:rgba(0,0,0,0); transition:background .35s ease }
-  #draw-modal.active { pointer-events:auto; background:rgba(0,0,0,0.8) }
-  #draw-modal img { max-width:92%; max-height:92%; border-radius:12px; box-shadow:0 30px 90px rgba(0,0,0,0.7); transform: translateZ(-200px) scale(.78); opacity:0; transition: transform .55s ease, opacity .55s ease }
-  #draw-modal img.modal-active { transform: translateZ(0) scale(1); opacity:1 }
-  #draw-modal .download-btn { position:absolute; top:20px; right:20px; padding:8px 10px; font-size:14px; border-radius:8px; border:0; background:rgba(255,255,255,0.12); color:#fff; cursor:pointer; opacity:0; transition:opacity .25s }
-  #draw-modal.active .download-btn { opacity:1 }
-
-/* ===== Coding tab styles (reused earlier) ===== */
-  .project-grid{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:12px}
-  .project-card{background:rgba(255,255,255,0.03);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;display:flex;flex-direction:column;gap:8px;min-height:110px}
-  .project-card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(0,0,0,0.5)}
-  .project-title{font-weight:700}
-  .project-desc{font-size:13px;color:var(--muted)}
-
-  .scripts-list{width:100%;display:flex;flex-direction:column;gap:8px;max-height:320px;overflow:auto;padding-right:6px}
-  .script-item{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .script-meta{display:flex;flex-direction:column}
-  .script-name{font-weight:700}
-  .script-desc{font-size:13px;color:var(--muted)}
-  .script-controls{display:flex;gap:8px}
-  .btn-sm{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);padding:6px 8px;border-radius:8px;cursor:pointer;color:#fff;font-size:13px}
-
-  .list-section{width:100%;margin-bottom:12px}
-  .list-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-  .list-body{margin-top:8px;display:none;flex-direction:column;gap:8px}
-  .list-body.active{display:flex}
-
-/* Project modal (re-usable for coding tab) */
-  .project-modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:1100; background:rgba(0,0,0,0); transition:background .35s ease; }
-  .project-modal.active{pointer-events:auto;background:rgba(0,0,0,0.84)}
-  .project-modal .card{ width:min(880px,92vw); max-height:86vh; overflow:auto; background:rgba(8,8,8,0.7); border-radius:14px; padding:20px; border:1px solid rgba(255,255,255,0.06); transform:scale(.95); transition:transform .33s ease,opacity .33s ease; opacity:0 }
-  .project-modal.active .card{transform:scale(1); opacity:1}
-  .project-modal .close{ position:absolute; top:18px; right:24px; font-size:22px; cursor:pointer; color:#fff; background:transparent; border:0 }
-
-  pre.code-block{background:rgba(0,0,0,0.45);padding:12px;border-radius:10px;overflow:auto;white-space:pre-wrap;font-size:13px;margin:8px 0;border:1px solid rgba(255,255,255,0.04)}
-  .small-note{font-size:13px;color:var(--muted);margin-top:6px}
-
-/* discord preview look-at-cursor */
-  #discord-preview { width:100%; max-width:520px; display:block; margin:14px auto 0; border-radius:12px; transition: transform .12s ease-out; transform-style:preserve-3d; box-shadow:0 20px 60px rgba(0,0,0,0.6); pointer-events:none; }
-
-/* small responsive */
-  @media (max-width:900px){
-    #discord-preview{max-width:90%}
-    #draw-modal img{max-width:94%}
-    .project-modal .card{width:94vw}
-  }
-
-  /* Streamer Dashboard Styles */
-  .stream-dashboard { display:flex; justify-content:center; margin-top:18px; }
-  .stream-card { background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(12px) saturate(140%); border-radius:16px; padding:24px; width:100%; max-width:680px; display:flex; flex-direction:column; align-items:center; gap:18px; transition: transform .25s ease, box-shadow .25s ease; cursor:pointer; box-shadow:0 15px 50px rgba(0,0,0,0.45); }
-  .stream-card:hover { transform:rotateX(3deg) rotateY(5deg) scale(1.01); box-shadow:0 25px 60px rgba(0,0,0,0.6); }
-  .profile-wrapper { position:relative; width:110px; height:110px; }
-  .profile-pic { width:100%; height:100%; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,0.15); }
-  .status-indicator { position:absolute; bottom:4px; right:4px; width:18px; height:18px; border-radius:50%; border:2px solid rgba(0,0,0,0.5); background:red; box-shadow:0 0 12px red; transition: box-shadow .3s ease, transform .3s ease; }
-  .status-indicator.live { background:#4ade80; box-shadow:0 0 12px #4ade80; animation: pulse 1.6s infinite; }
-  @keyframes pulse { 0%,100% { transform:scale(1); box-shadow:0 0 12px #4ade80; } 50% { transform:scale(1.3); box-shadow:0 0 20px #4ade80; } }
-
-  .stream-info { text-align:center; color:#fff; display:flex; flex-direction:column; gap:8px; }
-  .stream-info h2 { margin:0;font-size:20px;letter-spacing:0.5px; }
-  .stream-info p { margin:0;font-size:14px;color:rgba(255,255,255,0.85); }
-
-  .stream-buttons { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
-  .btn-stream { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); padding:8px 14px; border-radius:12px; color:#fff; text-decoration:none; font-size:13px; transition: all .25s ease; }
-  .btn-stream:hover { background:rgba(255,255,255,0.12); transform:scale(1.05); }
-
-  .schedule { background:rgba(255,255,255,0.05); border-radius:12px; padding:12px 18px; width:100%; text-align:center; color:#fff; font-size:14px; border:1px solid rgba(255,255,255,0.08); }
-  .schedule h3 { margin:0 0 6px; font-size:16px; }
-  .schedule ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; }
-  .schedule li { font-size:14px; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEALLY // MONOLITH EDITORIAL</title>
   
-/* Dashboard container */
-.dashboard-container { display:flex; flex-direction:column; gap:16px; margin-top:20px; perspective:1200px; }
-
-/* Card styling */
-.dashboard-card { background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(12px) saturate(140%); border-radius:16px; overflow:hidden; color:#fff; transition: transform 0.35s ease, box-shadow 0.35s ease; cursor:pointer; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
-.card-header { display:flex; justify-content:space-between; align-items:center; padding:16px; }
-.card-header h2 { margin:0; font-size:18px; letter-spacing:0.5px; }
-.card-icon { font-size:28px; transition: transform 0.3s ease; }
-.toggle-btn { font-size:22px; font-weight:bold; transition: transform 0.3s ease; }
-.card-content { padding:0 16px; max-height:0; overflow:hidden; transition: max-height 0.5s ease, padding 0.3s ease; }
-
-/* Hover & tilt effect */
-.dashboard-card:hover { transform:rotateX(2deg) rotateY(3deg) scale(1.01); box-shadow:0 20px 60px rgba(0,0,0,0.55); }
-.dashboard-card:hover .card-icon { transform:rotate(15deg) scale(1.2); }
-
-/* Expanded card */
-.dashboard-card.expanded .card-content { max-height:500px; padding:16px; }
-.dashboard-card.expanded .toggle-btn { transform: rotate(45deg); }
-
-/* Progress bar */
-.progress-bar { width:100%; height:8px; background:rgba(255,255,255,0.2); border-radius:8px; margin-top:8px; overflow:hidden; }
-.progress { height:100%; background:#4ADE80; border-radius:8px 0 0 8px; width:0%; }
-/* Card list items */
-.card-content ul { padding-left:20px; margin:0; }
-.card-content li { margin-bottom:6px; }
-#screen-block {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.95);
-  color: white;
-  z-index: 999999;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 20px;
-  backdrop-filter: blur(6px);
-}
-
-#screen-block .screen-block-box {
-  background: #151515;
-  padding: 40px 60px;
-  border-radius: 20px;
-  border: 2px solid #ffffff22;
-  box-shadow: 0 0 40px rgba(0, 132, 255, 0.35);
-}
-
-#screen-block h1 {
-  font-size: 2rem;
-  margin-bottom: 15px;
-}
-
-#screen-block p {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-</style>
-</head>
-<body>
-
-<div class="main-wrapper">
-  <div class="sidebar">
-    <h2>Portfolio</h2>
-    <button class="tab-btn" data-tab="draw">Drawings</button>
-    <button class="tab-btn active" data-tab="coding">Coding</button>
-    <button class="tab-btn" data-tab="stream">Stream</button>
-    <button class="tab-btn" data-tab="about">About</button>
-  </div>
-
-  <main class="panel" role="main">
-    <!-- DRAWING TAB -->
-    <section id="draw" class="tab-section" style="display:none; width:100%">
-      <h1>My Pencil Art</h1>
-      <p>Hand-drawn pencil Drawings. Click the front image to expand.</p>
-
-      <div class="carousel-wrapper">
-        <div class="carousel-container">
-          <button class="carousel-btn left" id="prev-btn" aria-label="Previous">&#8249;</button>
-          <div class="carousel" id="carousel">
-            <!-- artifacts provided earlier -->
-          <div class="carousel-card" data-title="Artwork 1" style="background-image:url('https://i.imgur.com/qcZ4Wa8.jpeg');">
-            <div class="carousel-caption">The start of a flow! My 4th-ever drawing, focusing on dramatic hair movement and expression. Still learning, but loving the process.</div>
-          </div>
-          <div class="carousel-card" data-title="Artwork 2" style="background-image:url('https://i.imgur.com/4rGvsKv.jpeg');">
-            <div class="carousel-caption">An intense stare. This close-up eye sketch was my 5th drawing. Trying to capture detail and emotion through dramatic lashes and shading.</div>
-          </div>
-          <div class="carousel-card" data-title="Artwork 3" style="background-image:url('https://i.imgur.com/5q7ZR4h.jpeg');">
-            <div class="carousel-caption">Getting into animals! Meet my 11th drawing: a fluffy rabbit portrait. Focused on texture and getting those whiskers just right.</div>
-          </div>
-          <div class="carousel-card" data-title="Artwork 4" style="background-image:url('https://i.imgur.com/zg7cCgg.jpeg');">
-            <div class="carousel-caption">A deep gaze. My 12th drawing ever—experimenting with light, shadow, and a more illustrative style. Happy with the intensity in her eyes!</div>
-          </div>
-          <div class="carousel-card" data-title="Artwork 5" style="background-image:url('https://i.imgur.com/QSJLPvw.jpeg');">
-            <div class="carousel-caption">Anime-style portrait with a furry friend! This is my 13th drawing, working on composition and soft shading. The cat was a fun challenge!</div>
-          </div>
-          <div class="carousel-card" data-title="Artwork 6" style="background-image:url('https://i.imgur.com/OjBEy8y.jpeg');">
-            <div class="carousel-caption">The demon's gaze. My 14th drawing ever—focused on capturing sharp horns, dynamic hair, and a strong, unsettling expression. Loved playing with the dark shading!</div>
-          </div>
-          </div>
-          <button class="carousel-btn right" id="next-btn" aria-label="Next">&#8250;</button>
-        </div>
-        <div id="carousel-progress">1 / 5</div>
-      </div>
-    </section>
-
-    <!-- CODING TAB -->
-    <section id="coding" class="tab-section" style="display:block; width:100%">
-      <h1>Coding Projects</h1>
-      <p>Click a project card to view details.</p>
-
-      <div class="project-grid" id="project-grid" role="list">
-        <div class="project-card" data-key="discord" role="listitem" tabindex="0">
-          <div><div class="project-title">Discord Theme</div><div class="project-desc">A modern, minimalist Discord Glassmorphic theme.</div></div>
-          <div class="muted">Theme</div>
-        </div>
-
-        <div class="project-card" data-key="tm" role="listitem" tabindex="0">
-          <div><div class="project-title">Tampermonkey Scripts</div><div class="project-desc">A List of all my tampermonkey QoL Scripts</div></div>
-          <div class="muted">Scripts</div>
-        </div>
-
-        <div class="project-card" data-key="roblox" role="listitem" tabindex="0">
-          <div><div class="project-title">Roblox Projects</div><div class="project-desc">UIs & Scripts</div></div>
-          <div class="muted">Roblox</div>
-        </div>
-      </div>
-    </section>
-
-<!-- STREAM TAB -->
-<section id="stream" class="tab-section" style="display:none; width:100%">
-  <h1>Streaming</h1>
-  <p>Catch me live! I try to stream regularly, but sometimes it's sporadic.</p>
-
-  <div class="stream-dashboard">
-    <div class="stream-card" id="stream-card">
-      <div class="profile-wrapper">
-        <img src="https://i.imgur.com/Nd3fUMg.jpeg" alt="Streamer Profile" class="profile-pic">
-        <div class="status-indicator" id="live-indicator"></div>
-      </div>
-      <div class="stream-info">
-        <h2 id="stream-title">Checking status...</h2>
-        <p id="stream-desc">Loading...</p>
-        <div class="stream-buttons">
-          <a href="https://twitch.tv/sealient" target="_blank" class="btn-stream">Twitch</a>
-          <a href="https://www.youtube.com/sealient" target="_blank" class="btn-stream">YouTube</a>
-          <a href="https://kick.com/sealient" target="_blank" class="btn-stream">Kick</a>
-        </div>
-      </div>
-      <div class="schedule">
-        <h3>Stream Schedule</h3>
-        <ul>
-          <li>Monday: 7–10 PM</li>
-          <li>Wednesday: 7-10 PM</li>
-          <li>Friday: 7–10 PM</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ABOUT SECTION: Dashboard Style -->
-<section id="about" class="tab-section" style="display:none; width:100%; position:relative;">
-  <h1>About Me</h1>
-
-  <!-- Dashboard container -->
-  <div class="dashboard-container">
-
-    <!-- Personal Info Panel -->
-    <div class="dashboard-card">
-      <div class="card-header">
-        <div class="card-icon">👋</div>
-        <h2>Personal Info</h2>
-        <div class="toggle-btn">+</div>
-      </div>
-      <div class="card-content">
-        <p>Hey, I’m Seal. I’m someone who’s still carving out my path, experimenting with different interests, and figuring out what direction fits me best. Right now, I’m focused on building skills, taking on new creative projects, and putting myself in spaces where I can grow.</p>
-      </div>
-    </div>
-
-    <!-- Creative Work Panel -->
-    <div class="dashboard-card">
-      <div class="card-header">
-        <div class="card-icon">💻</div>
-        <h2>Creative & Tech Work</h2>
-        <div class="toggle-btn">+</div>
-      </div>
-      <div class="card-content">
-        <ul>
-          <li>Drawing and Digital Art</li>
-          <li>Tampermonkey scripts</li>
-          <li>Roblox UI & gameplay scripts</li>
-          <li>Custom Discord themes</li>
-          <li>Web design & small coding projects</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Hobbies & Community Panel -->
-    <div class="dashboard-card">
-      <div class="card-header">
-        <div class="card-icon">🎵</div>
-        <h2>Hobbies & Community</h2>
-        <div class="toggle-btn">+</div>
-      </div>
-      <div class="card-content">
-        <p>Music helps me reset, and gaming has always been a place where I unwind and connect with people. I also run a community called Sealient’s Cove, building a welcoming space and learning how to manage a group.</p>
-      </div>
-    </div>
-
-    <!-- Future Goals Panel -->
-<div class="dashboard-card">
-  <div class="card-header">
-    <div class="card-icon">🌱</div>
-    <h2>Future Goals</h2>
-    <div class="toggle-btn">+</div>
-  </div>
-  <div class="card-content">
-    <p>I’m exploring where I want to go next — college, work, creative paths, or something in between. Even without all the answers, I move forward piece by piece, creating things that feel real and staying true to myself.</p>
-    
-    <!-- Dynamic progress bar -->
-    <div class="progress-bar">
-      <div class="progress"></div>
-    </div>
-    <small>Personal growth progress</small>
-  </div>
-</div>
-
-  </div>
-</section>
-  </main>
-</div>
-
-<div id="screen-block">
-  <div class="screen-block-box">
-    <h1>⚠️ Unsupported Screen Size</h1>
-    <p>This website is optimized for standard desktop resolutions only.</p>
-    <p>Please resize your browser or switch to a screen around 1080p.</p>
-  </div>
-</div>
-
-
-<div id="birthdayPopup" style="
-  display:none;
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  background:rgba(0,0,0,0.75);
-  padding:30px 40px;
-  border-radius:20px;
-  color:white;
-  backdrop-filter:blur(10px);
-  font-size:20px;
-  text-align:center;
-  z-index:999999;
-  opacity:0;
-  transition:opacity 0.6s ease;
-">
-  🎂 <b>Happy Birthday, Seal!</b><br><br>
-  You leveled up IRL today. Keep creating, keep growing. ✨
-</div>
-
-
-<!-- drawing modal -->
-<div id="draw-modal" aria-hidden="true">
-  <button class="download-btn" id="draw-download" aria-label="Download image">Download</button>
-  <img id="draw-modal-img" src="" alt="Artwork expanded">
-</div>
-
-<!-- coding project modal (reusable) -->
-<div id="project-modal" class="project-modal" aria-hidden="true">
-  <div class="card" role="dialog" aria-modal="true" aria-labelledby="proj-title">
-    <button class="close" id="proj-close" aria-label="Close project">✕</button>
-    <div id="proj-content"></div>
-  </div>
-</div>
-
-<script>
-/* =========================
-   Replace these arrays with your real content later
-   ========================= */
-const SCRIPTS = [
-  { name: "Cookie Clicker", desc: "Sleek, fully automated Cookie Clicker enhancer with auto-clicking, building and upgrade management, golden cookie handling, and performance-optimized gameplay.", code: `https://greasyfork.org/en/scripts/556556-cookie-clicker-ultimate` },
-];
-
-const ROBLOX_UIS = [
-  { name: "ReduxV1", img: "https://private-user-images.githubusercontent.com/192563121/500122491-b63acf01-a337-4236-acc4-37fa09d5245a.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjM4MDYxODUsIm5iZiI6MTc2MzgwNTg4NSwicGF0aCI6Ii8xOTI1NjMxMjEvNTAwMTIyNDkxLWI2M2FjZjAxLWEzMzctNDIzNi1hY2M0LTM3ZmEwOWQ1MjQ1YS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMTIyJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTEyMlQxMDA0NDVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0zZTg0NTIwNGE5ZTFhYTMxNTQ4YjU5ZjVhZDExNmIzZTBhZDY1M2ExNDEzMzFiZjI3ZGYzNTM1OTZiMGY5MWI2JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.vxcG8zcdEB9KICPBmwDkzKAuWxP1Z5G6KnqFets37oc", desc: "For Documentation and to use please visit: https://sealient.github.io/ReduxV1/" },
-];
-
-const ROBLOX_SCRIPTS = [
-  { name: "NSAP Menu (*OP*)", desc: "NSAP Features: Smart ESP, Auto Collector, Player Boosts, World Control, and Visual Enhancements.", code: `For the script please Visit: https://rscripts.net/script/nsap-menu-op-io3q` },
-  { name: "Abyssal *OP* *NO KEY*", desc: "3008- Abyssal features: 👁️ ESP SYSTEMS, 🚀 TELEPORT, 🎮 PLAYER MODS, and ⚡ PERFORMANCE.", code: `For the script please Visit: https://rscripts.net/script/3008-abyssal-op-no-key-GrDU` }
-];
-/* ========================= */
-
-/* ----- tabs setup ----- */
-document.querySelectorAll('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=> {
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const tab = btn.dataset.tab;
-    document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
-    document.getElementById(tab).style.display = 'block';
-  });
-});
-
-/* ========== DRAWING CAROUSEL ========== */
-const carousel = document.getElementById('carousel');
-const cards = Array.from(carousel.children);
-const numCards = cards.length;
-const radius = 250; // smaller feel
-let rotation = 0; // degrees
-const angleStep = 360 / numCards;
-
-const progressEl = document.getElementById('carousel-progress');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
-
-function positionCards() {
-  for (let i=0;i<numCards;i++){
-    const theta = (i * angleStep) + rotation;
-    cards[i].style.transform = `translate(-50%,-50%) rotateY(${theta}deg) translateZ(${radius}px)`;
-  }
-  // compute current index (front)
-  const normalized = ((Math.round(-rotation / angleStep) % numCards) + numCards) % numCards;
-  progressEl.textContent = `${normalized+1} / ${numCards}`;
-}
-positionCards();
-
-function rotateCarousel(dir){
-  rotation -= dir * angleStep;
-  rotation = Math.round(rotation / angleStep) * angleStep; // snap to step
-  positionCards();
-}
-
-// buttons
-prevBtn.addEventListener('click', ()=> rotateCarousel(-1));
-nextBtn.addEventListener('click', ()=> rotateCarousel(1));
-
-// keyboard nav for drawing
-document.addEventListener('keydown', (e)=>{
-  if (document.getElementById('draw').style.display === 'block') {
-    if (e.key === 'ArrowLeft') rotateCarousel(-1);
-    if (e.key === 'ArrowRight') rotateCarousel(1);
-  }
-});
-
-// parallax tilt on mouse move inside carousel container
-const carouselContainer = document.querySelector('.carousel-container');
-carouselContainer.addEventListener('mousemove', (e)=>{
-  const bounds = carouselContainer.getBoundingClientRect();
-  const x = (e.clientX - bounds.left - bounds.width/2) / bounds.width;
-  const y = (e.clientY - bounds.top - bounds.height/2) / bounds.height;
-  carousel.style.transform = `rotateX(${y*8}deg) rotateY(${x*12}deg)`;
-});
-carouselContainer.addEventListener('mouseleave', ()=>{
-  carousel.style.transform = `rotateX(0deg) rotateY(0deg)`;
-});
-
-/* ---- drawing modal (expand image) ---- */
-const drawModal = document.getElementById('draw-modal');
-const drawModalImg = document.getElementById('draw-modal-img');
-const drawDownload = document.getElementById('draw-download');
-
-function openDrawModal(url, filename){
-  drawModal.classList.add('active');
-  drawModal.setAttribute('aria-hidden','false');
-  drawModalImg.classList.remove('modal-active');
-  drawModalImg.src = url;
-  requestAnimationFrame(()=> requestAnimationFrame(()=> drawModalImg.classList.add('modal-active')));
-  drawDownload.onclick = (e)=>{
-    e.stopPropagation();
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename || 'artwork';
-    a.click();
-  };
-}
-
-function closeDrawModal(){
-  drawModalImg.classList.remove('modal-active');
-  // wait for transition end
-  const handler = () => {
-    drawModal.classList.remove('active');
-    drawModal.setAttribute('aria-hidden','true');
-    drawModalImg.removeEventListener('transitionend', handler);
-  };
-  drawModalImg.addEventListener('transitionend', handler);
-}
-drawModal.addEventListener('click', (e)=> { if (e.target === drawModal) closeDrawModal(); });
-/* clicking cards opens draw modal */
-cards.forEach(card=>{
-  card.addEventListener('click', ()=>{
-    const bg = card.style.backgroundImage; // url("...")
-    const url = bg.slice(5,-2);
-    openDrawModal(url, card.dataset.title || 'artwork');
-  });
-});
-
-/* ========== CODING TAB ========== */
-const projectCards = Array.from(document.querySelectorAll('.project-card'));
-const projModal = document.getElementById('project-modal');
-const projContent = document.getElementById('proj-content');
-const projClose = document.getElementById('proj-close');
-
-/* discord preview tilt (look at cursor) helpers */
-let discordPreviewEl = null;
-let discordMouseMoveHandler = null;
-
-projectCards.forEach(card=>{
-  card.addEventListener('click', ()=> openProjectModal(card.dataset.key));
-  // support keyboard enter on focused cards
-  card.addEventListener('keydown', (e)=> { if (e.key === 'Enter' || e.key === ' ') openProjectModal(card.dataset.key); });
-});
-
-projClose.addEventListener('click', closeProjectModal);
-projModal.addEventListener('click', (e)=> { if (e.target === projModal) closeProjectModal(); });
-
-function openProjectModal(key){
-  projContent.innerHTML = '';
-  // remove any previous preview handlers
-  removeDiscordPreviewHandlers();
-
-if (key === 'discord') {
-  // Title
-  const h = document.createElement('h2'); 
-  h.id = 'proj-title'; 
-  h.textContent = 'Lumix - A Discord Theme';
-  
-  // Subtitle
-  const p = document.createElement('p'); 
-  p.className = 'muted'; 
-  p.textContent = 'A modern, minimalist Discord Glassmorphic theme.';
-  
-  // Description
-  const desc = document.createElement('p'); 
-  desc.textContent = 'For Any Suggestions, Please Go To Contacts Tab';
-  
-  projContent.appendChild(h);
-  projContent.appendChild(p);
-  projContent.appendChild(desc);
-
-  // Preview image element (will tilt toward cursor)
-  const previewImg = document.createElement('img');
-  previewImg.id = 'discord-preview';
-  previewImg.src = 'https://i.imgur.com/xmlbVhZ.png';
-  previewImg.style.width = '900px'; 
-  previewImg.style.cursor = 'pointer';
-  previewImg.style.transition = 'transform 0.2s ease';
-  projContent.appendChild(previewImg);
-
-// Download button
-// Function to handle the actual download using Blob
-function initiateBlobDownload() {
-    // 1. Fetch the file data
-    fetch('Lumix.css') // Ensure 'your-theme.theme' is in the same folder or use the correct path
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.blob(); // Get the file content as a Blob object
-        })
-        .then(blob => {
-            // 2. Create a temporary URL from the Blob
-            const url = window.URL.createObjectURL(blob);
-            
-            // 3. Create a temporary <a> tag to trigger the download
-            const tempLink = document.createElement('a');
-            tempLink.href = url;
-            tempLink.download = 'Lumix.theme'; // Set the desired filename for the download
-            
-            // 4. Programmatically click the link
-            document.body.appendChild(tempLink);
-            tempLink.click();
-            
-            // 5. Clean up the temporary elements and URL
-            document.body.removeChild(tempLink);
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(error => {
-            console.error('Error initiating download:', error);
-            alert('Could not download the file. Check the console for details.');
-        });
-}
-
-// Download button creation and styling (as before)
-const downloadBtn = document.createElement('a');
-// The href is not strictly needed for this method, but you can leave it blank or use '#'
-downloadBtn.href = '#'; 
-downloadBtn.textContent = 'Download Theme';
-downloadBtn.className = 'download-btn';
-
-// --- Styling ---
-downloadBtn.style.display = 'inline-block';
-downloadBtn.style.marginTop = '12px';
-downloadBtn.style.padding = '10px 22px';
-downloadBtn.style.background = 'rgba(255,255,255,0.1)';
-downloadBtn.style.backdropFilter = 'blur(6px)';
-downloadBtn.style.color = '#fff';
-downloadBtn.style.border = '1px solid rgba(255,255,255,0.3)';
-downloadBtn.style.borderRadius = '12px';
-downloadBtn.style.fontWeight = 'bold';
-downloadBtn.style.textDecoration = 'none';
-downloadBtn.style.transition = 'all 0.3s ease';
-downloadBtn.style.cursor = 'pointer';
-downloadBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
-
-projContent.appendChild(downloadBtn);
-
-// Hover effect
-downloadBtn.addEventListener('mouseenter', () => {
-    downloadBtn.style.transform = 'scale(1.05)';
-    downloadBtn.style.background = 'rgba(255,255,255,0.15)';
-    downloadBtn.style.boxShadow = '0 6px 20px rgba(0,0,0,0.35)';
-});
-downloadBtn.addEventListener('mouseleave', () => {
-    downloadBtn.style.transform = 'scale(1)';
-    downloadBtn.style.background = 'rgba(255,255,255,0.1)';
-    downloadBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
-});
-
-// 👈 THIS IS THE CRITICAL CHANGE: Attach the Blob download function to the click event
-downloadBtn.addEventListener('click', (event) => {
-    event.preventDefault(); // Stop the default action (like following a '#' link)
-    initiateBlobDownload();
-});
-
-
-  // Small copyright note
-  const note = document.createElement('div'); 
-  note.className='small-note'; 
-  note.textContent = 'Copyright (c) 2025 Seal. All Rights Reserved. For personal use only; modification, redistribution, or commercial use prohibited.';
-  projContent.appendChild(note);
-
-  showProjectModal();
-
-  // Look-at-cursor effect
-  attachDiscordPreviewHandlers(previewImg);
-}
-
-  else if (key === 'tm'){
-    const h = document.createElement('h2'); h.textContent = 'Tampermonkey Scripts';
-    const intro = document.createElement('p'); intro.className = 'muted'; intro.textContent = 'Click a script to reveal code. Copy to clipboard using the button.';
-    projContent.appendChild(h); projContent.appendChild(intro);
-
-    const list = document.createElement('div'); list.className = 'scripts-list';
-    SCRIPTS.forEach(s=>{
-      const item = document.createElement('div'); item.className = 'script-item';
-      const meta = document.createElement('div'); meta.className='script-meta';
-      const name = document.createElement('div'); name.className='script-name'; name.textContent = s.name;
-      const d = document.createElement('div'); d.className='script-desc'; d.textContent = s.desc;
-      meta.appendChild(name); meta.appendChild(d);
-      const controls = document.createElement('div'); controls.className='script-controls';
-      const toggle = document.createElement('button'); toggle.className='btn-sm'; toggle.textContent='Show code';
-      const copy = document.createElement('button'); copy.className='btn-sm'; copy.textContent='Copy';
-      const code = document.createElement('pre'); code.className='code-block'; code.style.display='none'; code.textContent = s.code;
-      toggle.addEventListener('click', ()=> {
-        if (code.style.display === 'none'){ code.style.display='block'; toggle.textContent='Hide code'; } else { code.style.display='none'; toggle.textContent='Show code'; }
-      });
-      copy.addEventListener('click', async ()=>{
-        try { await navigator.clipboard.writeText(s.code); copy.textContent='Copied!'; setTimeout(()=> copy.textContent='Copy',900); } catch(e){ copy.textContent='Err'; setTimeout(()=> copy.textContent='Copy',900); }
-      });
-      controls.appendChild(toggle); controls.appendChild(copy);
-      item.appendChild(meta); item.appendChild(controls);
-      projContent.appendChild(item); projContent.appendChild(code);
-      list.appendChild(item);
-    });
-    projContent.appendChild(list);
-    showProjectModal();
-  }
-
-  else if (key === 'roblox'){
-    const h = document.createElement('h2'); h.textContent='Roblox — UIs & Scripts';
-    projContent.appendChild(h);
-    projContent.appendChild(Object.assign(document.createElement('p'), {className:'muted', textContent:'Expand the lists to view items. View images or show/copy code.'}));
-
-    // UI list
-    const uiSection = document.createElement('div'); uiSection.className='list-section';
-    const uiHeader = document.createElement('div'); uiHeader.className='list-header'; uiHeader.innerHTML = `<strong>UI Projects</strong><button class="btn-sm">Toggle</button>`;
-    const uiBody = document.createElement('div'); uiBody.className='list-body';
-    ROBLOX_UIS.forEach(u=>{
-      const row = document.createElement('div'); row.className='script-item';
-      const meta = document.createElement('div'); meta.style.display='flex'; meta.style.flexDirection='column';
-      meta.innerHTML = `<div class="script-name">${u.name}</div><div class="script-desc">${u.desc}</div>`;
-      const controls = document.createElement('div');
-      const viewBtn = document.createElement('button'); viewBtn.className='btn-sm'; viewBtn.textContent='View';
-      viewBtn.addEventListener('click', ()=> openImagePreview(u.img, u.name));
-      controls.appendChild(viewBtn);
-      row.appendChild(meta); row.appendChild(controls);
-      uiBody.appendChild(row);
-    });
-    uiSection.appendChild(uiHeader); uiSection.appendChild(uiBody);
-    projContent.appendChild(uiSection);
-
-    // Scripts list
-    const scriptSection = document.createElement('div'); scriptSection.className='list-section';
-    const scriptHeader = document.createElement('div'); scriptHeader.className='list-header'; scriptHeader.innerHTML = `<strong>Script Projects</strong><button class="btn-sm">Toggle</button>`;
-    const scriptBody = document.createElement('div'); scriptBody.className='list-body';
-    ROBLOX_SCRIPTS.forEach(s=>{
-      const row = document.createElement('div'); row.className='script-item';
-      const meta = document.createElement('div'); meta.style.display='flex'; meta.style.flexDirection='column';
-      meta.innerHTML = `<div class="script-name">${s.name}</div><div class="script-desc">${s.desc}</div>`;
-      const controls = document.createElement('div');
-      const showBtn = document.createElement('button'); showBtn.className='btn-sm'; showBtn.textContent='Show code';
-      const copyBtn = document.createElement('button'); copyBtn.className='btn-sm'; copyBtn.textContent='Copy';
-      const codeBlock = document.createElement('pre'); codeBlock.className='code-block'; codeBlock.style.display='none'; codeBlock.textContent = s.code;
-      showBtn.addEventListener('click', ()=> { codeBlock.style.display = codeBlock.style.display === 'none' ? 'block' : 'none'; showBtn.textContent = showBtn.textContent === 'Show code' ? 'Hide code' : 'Show code'; });
-      copyBtn.addEventListener('click', async ()=> { try{ await navigator.clipboard.writeText(s.code); copyBtn.textContent='Copied!'; setTimeout(()=>copyBtn.textContent='Copy',900);}catch(e){copyBtn.textContent='Err'; setTimeout(()=>copyBtn.textContent='Copy',900);} });
-      controls.appendChild(showBtn); controls.appendChild(copyBtn);
-      row.appendChild(meta); row.appendChild(controls);
-      scriptBody.appendChild(row);
-      projContent.appendChild(codeBlock);
-    });
-    scriptSection.appendChild(scriptHeader); scriptSection.appendChild(scriptBody);
-    projContent.appendChild(scriptSection);
-
-    // toggles
-    uiHeader.querySelector('button').addEventListener('click', ()=> uiBody.classList.toggle('active'));
-    scriptHeader.querySelector('button').addEventListener('click', ()=> scriptBody.classList.toggle('active'));
-
-    showProjectModal();
-  }
-
-  else {
-    projContent.innerHTML = '<h2>Project</h2><p>Not implemented.</p>';
-    showProjectModal();
-  }
-}
-
-/* show/hide project modal */
-function showProjectModal(){
-  projModal.classList.add('active');
-  projModal.setAttribute('aria-hidden','false');
-}
-function closeProjectModal(){
-  projModal.classList.remove('active');
-  projModal.setAttribute('aria-hidden','true');
-  removeDiscordPreviewHandlers();
-}
-
-/* image preview used by roblox list */
-function openImagePreview(imgUrl, title){
-  projContent.innerHTML = '';
-  const h = document.createElement('h2'); h.textContent = title;
-  const img = document.createElement('img'); img.src = imgUrl; img.style.maxWidth='80%'; img.style.borderRadius='10px'; img.style.display='block'; img.style.margin='12px auto';
-  projContent.appendChild(h); projContent.appendChild(img);
-  showProjectModal();
-}
-
-/* DISCORD preview "look at cursor" handlers */
-function attachDiscordPreviewHandlers(previewImg){
-  discordPreviewEl = previewImg;
-  const modalCard = document.querySelector('#project-modal .card');
-
-  // compute rotation based on mouse pos relative to preview center
-  discordMouseMoveHandler = (e) => {
-    const rect = discordPreviewEl.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    const dx = e.clientX - cx;
-    const dy = e.clientY - cy;
-    // Normalize
-    const rx = (dy / rect.height) * -15; // rotateX
-    const ry = (dx / rect.width) * 15; // rotateY
-    // clamp
-    const clamp = (v, a) => Math.max(-a, Math.min(a, v));
-    discordPreviewEl.style.transform = `perspective(900px) rotateX(${clamp(rx,15)}deg) rotateY(${clamp(ry,15)}deg) scale(1)`;
-  };
-
-  const leaveHandler = () => {
-    discordPreviewEl.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)`;
-  };
-
-  // attach to modal card (so movement when inside modal triggers it)
-  modalCard.addEventListener('mousemove', discordMouseMoveHandler);
-  modalCard.addEventListener('mouseleave', leaveHandler);
-
-  // store references so we can remove later
-  discordPreviewEl._modal = modalCard;
-  discordPreviewEl._mouseHandler = discordMouseMoveHandler;
-  discordPreviewEl._leaveHandler = leaveHandler;
-}
-
-function removeDiscordPreviewHandlers(){
-  if (!discordPreviewEl) return;
-  const modalCard = discordPreviewEl._modal;
-  if (modalCard && discordPreviewEl._mouseHandler) modalCard.removeEventListener('mousemove', discordPreviewEl._mouseHandler);
-  if (modalCard && discordPreviewEl._leaveHandler) modalCard.removeEventListener('mouseleave', discordPreviewEl._leaveHandler);
-  // reset transform
-  discordPreviewEl.style.transform = '';
-  discordPreviewEl = null;
-  discordMouseMoveHandler = null;
-}
-
-/* initial tab show - show coding by default */
-document.querySelectorAll('.tab-section').forEach(s => s.style.display = 'none');
-document.getElementById('coding').style.display = 'block';
-
-/* Accessibility: Escape closes any modal */
-document.addEventListener('keydown', (e)=>{
-  if (e.key === 'Escape') {
-    if (projModal.classList.contains('active')) closeProjectModal();
-    if (drawModal.classList.contains('active')) closeDrawModal();
-  }
-});
-
-const liveIndicator = document.getElementById('live-indicator');
-const streamTitle = document.getElementById('stream-title');
-const streamDesc = document.getElementById('stream-desc');
-
-// ----- CONFIGURE YOUR TWITCH INFO -----
-const TWITCH_CLIENT_ID = "gp762nuuoqcoxypju8c569th9wz7q5";
-const TWITCH_AUTH_TOKEN = "btscuoackdct9dxfp2q813h0w6qfhn"; // Bearer token
-const CHANNEL_NAME = "sealient"; // your Twitch username
-const REFRESH_INTERVAL = 30000; // check every 30s
-// --------------------------------------
-
-
-// Function to check Twitch live status
-async function checkLiveStatus() {
-  try {
-    const response = await fetch(`https://api.twitch.tv/helix/streams?user_login=${CHANNEL_NAME}`, {
-      headers: {
-        'Client-ID': TWITCH_CLIENT_ID,
-        'Authorization': `Bearer ${TWITCH_AUTH_TOKEN}`
-      }
-    });
-    const data = await response.json();
-
-    if(data.data && data.data.length > 0) {
-      // Channel is live
-      liveIndicator.classList.add('live');
-      streamTitle.textContent = 'Live Now!';
-      streamDesc.textContent = data.data[0].title || 'Streaming live on Twitch!';
-    } else {
-      // Offline
-      liveIndicator.classList.remove('live');
-      streamTitle.textContent = 'Currently Offline';
-      streamDesc.textContent = 'I stream when possible. Follow to catch me!';
-    }
-  } catch (e) {
-    // API fetch failed
-    liveIndicator.classList.remove('live');
-    streamTitle.textContent = 'Currently Offline';
-    streamDesc.textContent = 'I stream when possible. Follow to catch me!';
-    console.error('Twitch API error:', e);
-  }
-}
-
-// Initial check
-checkLiveStatus();
-// Recheck periodically
-setInterval(checkLiveStatus, REFRESH_INTERVAL);
-// 3D tilt effect
-document.querySelectorAll('.dashboard-card').forEach(card=>{
-  card.addEventListener('mousemove', e=>{
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const cx = rect.width/2;
-    const cy = rect.height/2;
-    const dx = (x - cx)/cx;
-    const dy = (y - cy)/cy;
-    card.style.transform = `rotateX(${-dy*3}deg) rotateY(${dx*3}deg) scale(1.01)`;
-  });
-  card.addEventListener('mouseleave', ()=>{ card.style.transform='rotateX(0deg) rotateY(0deg) scale(1)'; });
-});
-
-// Expand/collapse panels
-document.querySelectorAll('.dashboard-card').forEach(card=>{
-  const toggleBtn = card.querySelector('.toggle-btn');
-  toggleBtn.addEventListener('click', e=>{
-    e.stopPropagation(); // prevent tilt click interference
-    card.classList.toggle('expanded');
-  });
-});
-
-// ====== TRUE REAL-TIME BIRTHDAY PROGRESS BAR ======
-
-// Your birthday
-const birthDate = new Date(2007, 4, 7); // Month is 0-indexed: May 7, 2007
-const maxAge = 50; // 50-year milestone
-
-const progressBar = document.querySelector('.dashboard-card .progress-bar .progress');
-
-function updateProgressExactly() {
-    const now = new Date();
-
-    // Age in milliseconds
-    const ageMs = now - birthDate;
-
-    // Convert milliseconds → exact years including fractions
-    const ageYears = ageMs / (1000 * 60 * 60 * 24 * 365.2425);
-    // (365.2425 = true average year length including leap years)
-
-    // Progress percentage
-    const progressPercent = Math.min((ageYears / maxAge) * 100, 100);
-
-    // Apply to bar
-    progressBar.style.transition = "width 2s cubic-bezier(.25,.1,.25,1)";
-    progressBar.style.width = progressPercent + "%";
-
-    // If you want to visually verify:
-    console.log("Age:", ageYears.toFixed(8), "years");
-    console.log("Progress:", progressPercent.toFixed(6), "%");
-}
-
-// Run immediately
-updateProgressExactly();
-
-
-(function () {
-    // Your birthday
-    const birthdayMonth = 4; // March → 2
-    const birthdayDay = 7;  // Example: 14th
-
-    const now = new Date();
-
-    if (now.getMonth() === birthdayMonth && now.getDate() === birthdayDay) {
-        const popup = document.getElementById("birthdayPopup");
-        if (popup) {
-            popup.style.display = "block";
-
-            // fade in smoothly
-            requestAnimationFrame(() => {
-                popup.style.opacity = "1";
-            });
-
-            // auto-hide after 8 seconds (optional)
-            setTimeout(() => {
-                popup.style.opacity = "0";
-                setTimeout(() => popup.style.display = "none", 700);
-            }, 8000);
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              DEFAULT: '#a855f7',
+              neon: '#c084fc',
+              cyan: '#22d3ee',
+              dark: '#581c87'
+            },
+            spotify: '#1db954'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
         }
+      }
     }
-})();
+  </script>
+  
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-black text-white font-sans min-h-screen selection:bg-accent selection:text-white flex flex-col justify-between p-6 md:p-16 lg:p-24 overflow-x-hidden relative page-entering">
 
-function enforceScreenRange() {
-  const w = window.innerWidth;
+  <!-- MOUSE-REACTIVE AMBIENT GLOW -->
+  <div id="mouse-glow"></div>
 
-  // Customize these if needed
-  const minW = 700; 
-  const maxW = 2000;  // 2K fits, 4K gets blocked
+  <!-- CINEMATIC SHOCKWAVE FLASH -->
+  <div id="shockwave-flash" class="fixed inset-0 pointer-events-none z-50"></div>
 
-  if (w < minW || w > maxW) {
-    document.getElementById("screen-block").style.display = "flex";
-    document.body.style.overflow = "hidden";
-  } else {
-    document.getElementById("screen-block").style.display = "none";
-    document.body.style.overflow = "auto";
-  }
-}
+  <!-- UNIFIED CENTER-SPLIT CURTAINS & LASER ENGINE -->
+  <div id="split-container" class="fixed inset-0 pointer-events-none z-40 flex flex-col overflow-hidden">
+    <div class="curtain-half curtain-top-half"></div>
+    <div id="center-laser" class="middle-laser-line"></div>
+    <div class="curtain-half curtain-bottom-half"></div>
+  </div>
 
-enforceScreenRange();
-window.addEventListener("resize", enforceScreenRange);</script>
+  <!-- TOP EDITORIAL HEADER -->
+  <header class="w-full max-w-[1600px] mx-auto flex justify-between items-center pb-8 border-b border-neutral-900 text-xs font-mono uppercase tracking-widest relative z-20">
+    <div class="flex items-center gap-3">
+      <span class="text-accent font-bold animate-pulse">●</span>
+      <span class="text-neutral-400">SEALLY // PORTFOLIO_INDEX</span>
+    </div>
 
+    <!-- AUDIO TOGGLE -->
+    <button id="sfx-toggle" class="text-neutral-500 hover:text-accent transition flex items-center gap-2 cursor-pointer bg-neutral-950 px-4 py-2 border border-neutral-900 text-xs">
+      <i class="fa-solid fa-volume-xmark" id="sfx-icon"></i>
+      <span id="sfx-text">SFX: OFF</span>
+    </button>
+  </header>
+
+  <!-- MAIN EDITORIAL WORKSPACE -->
+  <main class="w-full max-w-[1600px] mx-auto my-auto py-12 lg:py-16 relative z-20 space-y-16">
+
+    <!-- HERO STATEMENT SECTION -->
+    <div class="hero-reveal-1 grid grid-cols-1 lg:grid-cols-12 gap-12 items-end pb-12 border-b border-neutral-900">
+      <div class="lg:col-span-8 space-y-6">
+        <div class="inline-flex items-center gap-3 border border-neutral-800 bg-neutral-950/60 text-neutral-400 font-mono text-xs px-4 py-2 uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
+          <span>ANAHEIM, CA // GEN Z CREATOR</span>
+        </div>
+        <h1 class="text-7xl sm:text-9xl font-black tracking-tighter uppercase leading-none">
+          <span class="text-accent glow-heading">SEALLY</span>
+        </h1>
+        <p class="text-neutral-400 text-base sm:text-lg font-mono max-w-2xl leading-relaxed">
+          Full-stack developer, script engineer, and traditional graphite artist. Designing high-contrast digital experiences and immersive interactive systems.
+        </p>
+      </div>
+
+      <!-- METADATA BADGE -->
+      <div class="lg:col-span-4 bg-neutral-950/80 border border-neutral-900 p-6 backdrop-blur-md space-y-3 font-mono text-xs">
+        <div class="text-accent uppercase tracking-widest">// SYSTEM TELEMETRY</div>
+        <div class="flex justify-between text-neutral-400 py-1 border-b border-neutral-900">
+          <span>RIG:</span>
+          <span class="text-white">I9-12900K // RTX 4060</span>
+        </div>
+        <div class="flex justify-between text-neutral-400 py-1 border-b border-neutral-900">
+          <span>DISPLAY:</span>
+          <span class="text-white">1440P @ 200HZ</span>
+        </div>
+        <div class="flex justify-between text-neutral-400 py-1">
+          <span>DISCORD:</span>
+          <span class="text-accent font-bold">sealrl_</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDITORIAL NAVIGATION STRIP -->
+    <div class="hero-reveal-2 flex flex-col divide-y divide-neutral-900 border-t border-b border-neutral-900">
+      
+      <!-- Project Archive -->
+      <a href="projects.html" class="portal-link group py-8 px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-neutral-950/80 transition duration-300">
+        <div class="flex items-baseline gap-6">
+          <span class="font-mono text-xs text-neutral-600 group-hover:text-accent transition">01</span>
+          <h2 class="text-4xl sm:text-6xl font-black uppercase tracking-tight group-hover:text-accent transition duration-300">Projects Archive</h2>
+        </div>
+        <div class="flex items-center gap-6 font-mono text-xs text-neutral-500">
+          <span class="hidden xl:inline text-neutral-600">// Full-stack apps, web architecture & GitHub integrations</span>
+          <span class="text-white group-hover:translate-x-2 transition duration-300 flex items-center gap-2">EXPLORE MODULE <i class="fa-solid fa-arrow-right text-accent"></i></span>
+        </div>
+      </a>
+
+      <!-- Roblox Terminal -->
+      <a href="roblox.html" class="portal-link group py-8 px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-neutral-950/80 transition duration-300">
+        <div class="flex items-baseline gap-6">
+          <span class="font-mono text-xs text-neutral-600 group-hover:text-accent transition">02</span>
+          <h2 class="text-4xl sm:text-6xl font-black uppercase tracking-tight group-hover:text-accent transition duration-300">Roblox Terminal</h2>
+        </div>
+        <div class="flex items-center gap-6 font-mono text-xs text-neutral-500">
+          <span class="hidden xl:inline text-neutral-600">// AeraUI framework, custom ESP highlights & scripts</span>
+          <span class="text-white group-hover:translate-x-2 transition duration-300 flex items-center gap-2">EXPLORE MODULE <i class="fa-solid fa-arrow-right text-accent"></i></span>
+        </div>
+      </a>
+
+      <!-- Minecraft Matrix -->
+      <a href="minecraft.html" class="portal-link group py-8 px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-neutral-950/80 transition duration-300">
+        <div class="flex items-baseline gap-6">
+          <span class="font-mono text-xs text-neutral-600 group-hover:text-accent transition">03</span>
+          <h2 class="text-4xl sm:text-6xl font-black uppercase tracking-tight group-hover:text-accent transition duration-300">Minecraft Matrix</h2>
+        </div>
+        <div class="flex items-center gap-6 font-mono text-xs text-neutral-500">
+          <span class="hidden xl:inline text-neutral-600">// Server events, world architecture & schematic downloads</span>
+          <span class="text-white group-hover:translate-x-2 transition duration-300 flex items-center gap-2">EXPLORE MODULE <i class="fa-solid fa-arrow-right text-accent"></i></span>
+        </div>
+      </a>
+
+      <!-- Graphite Gallery -->
+      <a href="drawings.html" class="portal-link group py-8 px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-neutral-950/80 transition duration-300">
+        <div class="flex items-baseline gap-6">
+          <span class="font-mono text-xs text-neutral-600 group-hover:text-accent transition">04</span>
+          <h2 class="text-4xl sm:text-6xl font-black uppercase tracking-tight group-hover:text-accent transition duration-300">Graphite Gallery</h2>
+        </div>
+        <div class="flex items-center gap-6 font-mono text-xs text-neutral-500">
+          <span class="hidden xl:inline text-neutral-600">// Traditional pencil art studies & subtractive eraser work</span>
+          <span class="text-white group-hover:translate-x-2 transition duration-300 flex items-center gap-2">EXPLORE MODULE <i class="fa-solid fa-arrow-right text-accent"></i></span>
+        </div>
+      </a>
+
+      <!-- Identity Terminal -->
+      <a href="about.html" class="portal-link group py-8 px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-neutral-950/80 transition duration-300">
+        <div class="flex items-baseline gap-6">
+          <span class="font-mono text-xs text-neutral-600 group-hover:text-accent transition">05</span>
+          <h2 class="text-4xl sm:text-6xl font-black uppercase tracking-tight group-hover:text-accent transition duration-300">Identity Terminal</h2>
+        </div>
+        <div class="flex items-center gap-6 font-mono text-xs text-neutral-500">
+          <span class="hidden xl:inline text-neutral-600">// Rig telemetry, live uptime clock & gaming loadouts</span>
+          <span class="text-white group-hover:translate-x-2 transition duration-300 flex items-center gap-2">EXPLORE MODULE <i class="fa-solid fa-arrow-right text-accent"></i></span>
+        </div>
+      </a>
+
+      <!-- Signal Matrix -->
+      <a href="connect.html" class="portal-link group py-8 px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:bg-neutral-950/80 transition duration-300">
+        <div class="flex items-baseline gap-6">
+          <span class="font-mono text-xs text-spotify group-hover:text-spotify transition">06</span>
+          <h2 class="text-4xl sm:text-6xl font-black uppercase tracking-tight group-hover:text-spotify transition duration-300">Signal Matrix</h2>
+        </div>
+        <div class="flex items-center gap-6 font-mono text-xs text-neutral-500">
+          <span class="hidden xl:inline text-neutral-600">// Discord contacts, socials & live Spotify HUD</span>
+          <span class="text-spotify group-hover:translate-x-2 transition duration-300 flex items-center gap-2">ESTABLISH LINK <i class="fa-solid fa-arrow-right text-spotify"></i></span>
+        </div>
+      </a>
+
+    </div>
+
+  </main>
+
+  <!-- BOTTOM EDITORIAL FOOTER -->
+  <footer class="w-full max-w-[1600px] mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest relative z-20 text-neutral-500">
+    <div>© 2026 SEALLY. ALL RIGHTS RESERVED.</div>
+    <div class="flex items-center gap-8 font-bold">
+      <a href="index.html" class="portal-link editorial-link text-white uppercase">Index</a>
+      <a href="projects.html" class="portal-link editorial-link hover:text-white transition uppercase">Projects</a>
+      <a href="minecraft.html" class="portal-link editorial-link hover:text-white transition uppercase">Minecraft</a>
+      <a href="about.html" class="portal-link editorial-link hover:text-white transition uppercase">About</a>
+      <a href="connect.html" class="portal-link editorial-link hover:text-white transition uppercase">Connect</a>
+    </div>
+  </footer>
+
+  <!-- SCRIPT ENGINE -->
+  <script src="script.js"></script>
 </body>
 </html>
-
-

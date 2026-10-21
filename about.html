@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEALLY // CYBERNETIC TELEMETRY DECK</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            accent: {
+              DEFAULT: '#a855f7',
+              neon: '#c084fc',
+              cyan: '#22d3ee',
+              dark: '#581c87'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Custom Cyber Scanline Effect */
+    .scanline {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.3) 50%,
+        rgba(0, 0, 0, 0.3)
+      );
+      background-size: 100% 4px;
+    }
+    @keyframes glitch-anim {
+      0% { opacity: 1; transform: translate(0); }
+      20% { opacity: 0.8; transform: translate(-2px, 2px); }
+      40% { opacity: 1; transform: translate(2px, -1px); }
+      60% { opacity: 0.9; transform: translate(-1px, -2px); }
+      80% { opacity: 1; transform: translate(1px, 1px); }
+      100% { opacity: 1; transform: translate(0); }
+    }
+    .glitch-screen {
+      animation: glitch-anim 0.2s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-black text-white font-sans min-h-screen selection:bg-accent selection:text-white flex flex-col justify-between p-6 md:p-16 lg:p-24 overflow-x-hidden relative page-entering">
+
+  <!-- MOUSE-REACTIVE AMBIENT GLOW -->
+  <div id="mouse-glow"></div>
+
+  <!-- CINEMATIC SHOCKWAVE FLASH -->
+  <div id="shockwave-flash" class="fixed inset-0 pointer-events-none z-50"></div>
+
+  <!-- UNIFIED CENTER-SPLIT CURTAINS & LASER ENGINE -->
+  <div id="split-container" class="fixed inset-0 pointer-events-none z-40 flex flex-col overflow-hidden">
+    <div class="curtain-half curtain-top-half"></div>
+    <div id="center-laser" class="middle-laser-line"></div>
+    <div class="curtain-half curtain-bottom-half"></div>
+  </div>
+
+  <!-- TOP EDITORIAL HEADER -->
+  <header class="w-full max-w-[1600px] mx-auto flex justify-between items-center pb-8 border-b border-neutral-900 text-xs font-mono uppercase tracking-widest relative z-20">
+    <div class="flex items-center gap-3">
+      <span class="text-accent font-bold animate-pulse">●</span>
+      <span class="text-neutral-400">SEALLY // CYBER_TELEMETRY_DECK</span>
+    </div>
+
+    <!-- AUDIO TOGGLE -->
+    <button id="sfx-toggle" class="text-neutral-500 hover:text-accent transition flex items-center gap-2 cursor-pointer bg-neutral-950 px-4 py-2 border border-neutral-900 text-xs">
+      <i class="fa-solid fa-volume-xmark" id="sfx-icon"></i>
+      <span id="sfx-text">SFX: OFF</span>
+    </button>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="w-full max-w-[1600px] mx-auto my-auto py-12 lg:py-16 relative z-20 space-y-12">
+
+    <!-- PAGE HEADER & LIVE CLOCK -->
+    <div class="hero-reveal-1 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 pb-8 border-b border-neutral-900">
+      <div class="space-y-4 max-w-3xl">
+        <div class="inline-flex items-center gap-3 border border-neutral-800 bg-neutral-950/60 text-neutral-400 font-mono text-xs px-4 py-2 uppercase tracking-wider">
+          <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
+          <span>BORN 05.07.2007 // ANAHEIM, CA</span>
+        </div>
+        <h1 class="text-5xl sm:text-7xl font-black tracking-tighter uppercase">
+          ABOUT <span class="text-accent glow-heading">ME</span>
+        </h1>
+        <p class="text-neutral-400 text-sm sm:text-base font-mono">
+          High-performance cybernetic subsystem inspector. Click any module below to re-route system telemetry.
+        </p>
+      </div>
+
+      <!-- LIVE AGE CLOCK -->
+      <div class="bg-neutral-950/80 border border-neutral-900 p-6 backdrop-blur-md space-y-2 font-mono text-xs min-w-[300px] relative overflow-hidden">
+        <div class="absolute inset-0 scanline pointer-events-none opacity-20"></div>
+        <div class="text-accent uppercase tracking-widest flex justify-between items-center">
+          <span>// LIVE UPTIME CLOCK</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-accent animate-ping"></span>
+        </div>
+        <div class="flex justify-between text-neutral-400 py-1 border-b border-neutral-900">
+          <span>STATUS:</span>
+          <span class="text-white">ONLINE // GEN Z</span>
+        </div>
+        <div class="flex justify-between text-neutral-400 py-1">
+          <span>EXACT AGE:</span>
+          <span id="exact-age-counter" class="text-accent font-bold">Calculating...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE SUBSYSTEM DECK -->
+    <div class="hero-reveal-2 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- LEFT: SUBSYSTEM SELECTOR BUTTONS -->
+      <div class="lg:col-span-4 space-y-3" id="subsystem-nav">
+        <!-- Injected dynamically via about-data.js -->
+      </div>
+
+      <!-- RIGHT: LIVE TELEMETRY DISPLAY SCREEN WITH SCANLINES & GLITCH -->
+      <div id="telemetry-screen" class="lg:col-span-8 bg-neutral-950/90 border border-neutral-800 hover:border-accent p-8 lg:p-12 backdrop-blur-xl space-y-8 relative overflow-hidden transition duration-300 shadow-2xl">
+        <!-- Scanline Overlay -->
+        <div class="absolute inset-0 scanline pointer-events-none opacity-30"></div>
+        
+        <!-- Background Ambient Neon Glow -->
+        <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-accent/10 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+
+        <!-- Header Telemetry Info -->
+        <div class="space-y-4 relative z-10">
+          <div class="flex items-center justify-between text-xs font-mono text-neutral-500">
+            <span id="display-module-id" class="text-accent font-bold">// SUBSYSTEM_01</span>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-emerald-400">SYNCED // 200HZ</span>
+            </div>
+          </div>
+          <h2 id="display-headline" class="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white transition-all duration-300">
+            <!-- Injected -->
+          </h2>
+        </div>
+
+        <!-- Main Content Readout -->
+        <div class="relative z-10 border-l-2 border-accent/60 pl-6 py-2">
+          <p id="display-content" class="text-neutral-300 text-sm sm:text-base font-mono leading-relaxed transition-all duration-300">
+            <!-- Injected -->
+          </p>
+        </div>
+
+        <!-- DYNAMIC RIG STAT METERS (Connected to active tab) -->
+        <div class="relative z-10 pt-6 border-t border-neutral-900 grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-[10px]">
+          <div class="bg-black/80 p-3.5 border border-neutral-800 space-y-1.5 hover:border-accent transition">
+            <div id="stat-label-1" class="text-neutral-500">PROCESSOR</div>
+            <div id="stat-val-1" class="text-accent font-bold truncate text-xs">I9-12900K</div>
+            <div class="w-full h-1 bg-neutral-900 overflow-hidden"><div class="h-full bg-accent w-full animate-pulse"></div></div>
+          </div>
+          <div class="bg-black/80 p-3.5 border border-neutral-800 space-y-1.5 hover:border-accent transition">
+            <div id="stat-label-2" class="text-neutral-500">GPU</div>
+            <div id="stat-val-2" class="text-accent font-bold truncate text-xs">RTX 4060</div>
+            <div class="w-full h-1 bg-neutral-900 overflow-hidden"><div class="h-full bg-accent w-5/6"></div></div>
+          </div>
+          <div class="bg-black/80 p-3.5 border border-neutral-800 space-y-1.5 hover:border-accent transition">
+            <div class="text-neutral-500">MEMORY</div>
+            <div class="text-accent font-bold truncate text-xs">32 GB RAM</div>
+            <div class="w-full h-1 bg-neutral-900 overflow-hidden"><div class="h-full bg-accent w-3/4"></div></div>
+          </div>
+          <div class="bg-black/80 p-3.5 border border-neutral-800 space-y-1.5 hover:border-accent transition">
+            <div class="text-neutral-500">DISPLAY</div>
+            <div class="text-accent font-bold truncate text-xs">1440P 200HZ</div>
+            <div class="w-full h-1 bg-neutral-900 overflow-hidden"><div class="h-full bg-accent w-full"></div></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- BOTTOM EDITORIAL FOOTER -->
+  <footer class="w-full max-w-[1600px] mx-auto pt-8 border-t border-neutral-900 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono uppercase tracking-widest relative z-20 text-neutral-500">
+    <div>© 2026 SEALLY. ALL RIGHTS RESERVED.</div>
+    <div class="flex items-center gap-8 font-bold">
+      <a href="index.html" class="portal-link editorial-link text-accent uppercase">Index</a>
+      <a href="projects.html" class="portal-link editorial-link hover:text-white transition uppercase">Projects</a>
+      <a href="roblox.html" class="portal-link editorial-link hover:text-white transition uppercase">Roblox</a>
+      <a href="minecraft.html" class="portal-link editorial-link hover:text-white transition uppercase">Minecraft</a>
+      <a href="drawings.html" class="portal-link editorial-link hover:text-white transition uppercase">Drawings</a>
+      <a href="about.html" class="portal-link editorial-link text-white uppercase">About</a>
+      <a href="connect.html" class="portal-link editorial-link hover:text-white transition uppercase">Connect</a>
+    </div>
+  </footer>
+
+  <!-- LOAD DATA FIRST, THEN LOGIC -->
+  <script src="about-data.js"></script>
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof aboutTerminalData === 'undefined') return;
+
+      const navContainer = document.getElementById('subsystem-nav');
+      navContainer.innerHTML = '';
+
+// Render Subsystem Buttons with Hover Glow Effects
+      aboutTerminalData.subsystems.forEach((sub, index) => {
+        const btn = document.createElement('button');
+        btn.className = `sub-btn w-full text-left p-5 bg-neutral-950/80 border ${index === 0 ? 'border-accent bg-neutral-900 text-white shadow-[0_0_15px_rgba(168,85,247,0.2)]' : 'border-neutral-900 text-neutral-400'} hover:border-accent hover:text-white transition-all duration-300 cursor-pointer space-y-1 backdrop-blur-md relative group overflow-hidden`;
+        btn.setAttribute('onclick', `loadSubsystem('${sub.id}', this)`);
+        btn.innerHTML = `
+          <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent opacity-0 group-hover:opacity-100 transition"></div>
+          <div class="text-[10px] font-mono text-accent uppercase tracking-widest">${sub.title.split('//')[0]}</div>
+          <div class="text-sm font-black uppercase tracking-tight">${sub.title.split('//')[1]}</div>
+        `;
+        navContainer.appendChild(btn);
+      });
+      
+      // Load first subsystem by default
+      loadSubsystem(aboutTerminalData.subsystems[0].id, navContainer.firstElementChild);
+
+      // Live Age Counter Calculator (Born May 7, 2007)
+      const birthDate = new Date('2007-05-07T00:00:00');
+      function updateAge() {
+        const now = new Date();
+        const diffTime = now - birthDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const years = Math.floor(diffDays / 365.25);
+        const days = Math.floor(diffDays % 365.25);
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+
+        const counterEl = document.getElementById('exact-age-counter');
+        if (counterEl) {
+          counterEl.textContent = `${years}Y ${days}D ${hours}H ${minutes}M ${seconds}S`;
+        }
+      }
+      updateAge();
+      setInterval(updateAge, 1000);
+    });
+
+    function loadSubsystem(id, element) {
+      const sub = aboutTerminalData.subsystems.find(s => s.id === id);
+      if (!sub) return;
+
+      // Trigger Glitch Animation on Screen Change
+      const screen = document.getElementById('telemetry-screen');
+      screen.classList.add('glitch-screen');
+      setTimeout(() => screen.classList.remove('glitch-screen'), 200);
+
+      // Update active button styling
+      document.querySelectorAll('.sub-btn').forEach(btn => {
+        btn.classList.remove('border-accent', 'bg-neutral-900', 'text-white', 'shadow-[0_0_15px_rgba(168,85,247,0.2)]');
+        btn.classList.add('border-neutral-900', 'text-neutral-400');
+      });
+      if (element) {
+        element.classList.remove('border-neutral-900', 'text-neutral-400');
+        element.classList.add('border-accent', 'bg-neutral-900', 'text-white', 'shadow-[0_0_15px_rgba(168,85,247,0.2)]');
+      }
+
+      // Update Screen Display Data
+      document.getElementById('display-module-id').textContent = `// ${sub.title}`;
+      document.getElementById('display-headline').textContent = sub.headline;
+      document.getElementById('display-content').textContent = sub.content;
+
+      // Update Custom Metrics for this tab if available
+      if (sub.metrics) {
+        document.getElementById('stat-label-1').textContent = sub.metrics.label1;
+        document.getElementById('stat-val-1').textContent = sub.metrics.val1;
+        document.getElementById('stat-label-2').textContent = sub.metrics.label2;
+        document.getElementById('stat-val-2').textContent = sub.metrics.val2;
+      }
+    }
+  </script>
+</body>
+</html>
