@@ -1,0 +1,5 @@
+{
+  "version": "2.1.0",
+  "release_notes": "Includes optimized OpenCV multi-threading pipelines and updated Python runtime binaries.",
+  "download_url": "https://raw.githubusercontent.com/Sealient/sealient.github.io/main/SeaCam2-Updates/SeaCam2_Update_Package.zip"
+}
